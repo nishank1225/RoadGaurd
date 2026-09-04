@@ -1,4 +1,6 @@
-import { createClient } from "npm:@supabase/supabase-js@2.57.4";
+/// <reference types="@types/deno" />
+import { createClient } from "@supabase/supabase-js";
+
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
@@ -25,7 +27,11 @@ Deno.serve(async (req: Request) => {
       auth: { autoRefreshToken: false, persistSession: false },
     });
 
-    const { email, password, fullName } = await req.json();
+    const { email, password, fullName } = (await req.json()) as {
+      email?: string;
+      password?: string;
+      fullName?: string;
+    };
     if (!email || !password) {
       return new Response(JSON.stringify({ error: "email and password required" }), {
         status: 400, headers: { ...corsHeaders, "Content-Type": "application/json" },

@@ -1,0 +1,5 @@
+{
+  "deno.enable": true,
+  "deno.enablePaths": ["project-bolt-sb1-mipbayfi (1)/project/supabase/functions"],
+  "deno.importMap": "project-bolt-sb1-mipbayfi (1)/project/supabase/functions/deno.json"
+}
