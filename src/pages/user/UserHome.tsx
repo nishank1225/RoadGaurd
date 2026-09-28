@@ -28,7 +28,20 @@ export function UserHome({ reports, onNavigate }: { reports: Report[]; onNavigat
   const pending = reports.filter((r) => ['pending', 'submitted', 'under_review'].includes(r.status));
   const rejected = reports.filter((r) => r.status === 'rejected');
   const critical = reports.filter((r) => r.severity === 'critical');
-  const roadHealthScore = reports.length ? Math.round((approved.length / reports.length) * 100) : 0;
+  const roadHealthScore = reports.length
+    ? Math.round(
+      reports.reduce((total, report) => {
+        const healthBySeverity = {
+          low: 100,
+          medium: 75,
+          high: 50,
+          critical: 0,
+        };
+
+        return total + healthBySeverity[report.severity];
+      }, 0) / reports.length
+    )
+    : 0;
 
   const sevData = (['low', 'medium', 'high', 'critical'] as const).map((s) => ({
     label: SEVERITY_LABEL[s], value: reports.filter((r) => r.severity === s).length, color: severityColor(s),
