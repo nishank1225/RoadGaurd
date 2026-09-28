@@ -15,6 +15,8 @@ export interface Profile {
   email: string;
   full_name: string;
   phone: string;
+  latitude?: number | null;
+  longitude?: number | null;
   avatar_url: string;
   role: Role;
   is_active: boolean;

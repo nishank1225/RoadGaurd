@@ -11,10 +11,10 @@ interface AuthCtx {
   profile: Profile | null;
   state: AuthState;
   signIn: (email: string, password: string) => Promise<void>;
-  signUp: (email: string, password: string, fullName: string) => Promise<void>;
+  signUp: (email: string, password: string, fullName: string, phone?: string, latitude?: number, longitude?: number) => Promise<void>;
   signInWithGoogle: () => Promise<void>;
   sendOtp: (email: string) => Promise<void>;
-  verifyOtpAndSignUp: (email: string, token: string, password: string, fullName: string) => Promise<void>;
+  verifyOtpAndSignUp: (email: string, token: string, password: string, fullName: string, phone?: string, latitude?: number, longitude?: number) => Promise<void>;
   verifyOtpAndSignIn: (email: string, token: string) => Promise<void>;
   signOut: () => Promise<void>;
   resetPassword: (email: string) => Promise<void>;
@@ -77,12 +77,38 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (error) throw error;
   };
-  const signUp = async (email: string, password: string, fullName: string) => {
+  const signUp = async (
+    email: string,
+    password: string,
+    fullName: string,
+    phone?: string,
+    latitude?: number,
+    longitude?: number
+  ) => {
     const { data, error } = await supabase.auth.signUp({
-      email, password, options: { data: { full_name: fullName } },
+      email,
+      password,
+      options: {
+        data: {
+          full_name: fullName,
+          phone: phone || '',
+          latitude: latitude ?? null,
+          longitude: longitude ?? null,
+        },
+      },
     });
     if (error) throw error;
-    if (data.user) await logAudit('register', 'auth', data.user.id, { email });
+    if (data.user) {
+      await supabase.from('profiles').upsert({
+        id: data.user.id,
+        email,
+        full_name: fullName,
+        phone: phone || '',
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
+      });
+      await logAudit('register', 'auth', data.user.id, { email });
+    }
   };
   const sendOtp = async (email: string) => {
     const { error } = await supabase.auth.signInWithOtp({
@@ -90,15 +116,39 @@ export function AuthProvider({ children }: { children: ReactNode }) {
     });
     if (error) throw error;
   };
-  const verifyOtpAndSignUp = async (email: string, token: string, password: string, fullName: string) => {
+  const verifyOtpAndSignUp = async (
+    email: string,
+    token: string,
+    password: string,
+    fullName: string,
+    phone?: string,
+    latitude?: number,
+    longitude?: number
+  ) => {
     const { data: authData, error: verifyError } = await supabase.auth.verifyOtp({
       email, token, type: 'email',
     });
     if (verifyError) throw verifyError;
     const uid = authData.user?.id;
     if (uid) {
-      const { error: pwError } = await supabase.auth.updateUser({ password, data: { full_name: fullName } });
+      const { error: pwError } = await supabase.auth.updateUser({
+        password,
+        data: {
+          full_name: fullName,
+          phone: phone || '',
+          latitude: latitude ?? null,
+          longitude: longitude ?? null,
+        },
+      });
       if (pwError) throw pwError;
+      await supabase.from('profiles').upsert({
+        id: uid,
+        email,
+        full_name: fullName,
+        phone: phone || '',
+        latitude: latitude ?? null,
+        longitude: longitude ?? null,
+      });
       await logAudit('register', 'auth', uid, { email });
     }
   };

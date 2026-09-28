@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle, KeyRound, CheckCircle2, Loader2, ArrowLeft, User } from 'lucide-react';
+import { Mail, Lock, Eye, EyeOff, ArrowRight, ShieldCheck, AlertCircle, KeyRound, CheckCircle2, Loader2, ArrowLeft, User, Phone, MapPin } from 'lucide-react';
 import { useAuth } from '@/context/AuthContext';
 
 function GoogleIcon({ size = 18 }: { size?: number }) {
@@ -142,12 +142,14 @@ export function Login({ onSwitch, onForgot }: { onSwitch: () => void; onForgot: 
 }
 
 export function Register({ onSwitch }: { onSwitch: () => void }) {
-  const { sendOtp, verifyOtpAndSignUp, signInWithGoogle } = useAuth();
-  const [step, setStep] = useState<1 | 2>(1);
+  const { signUp, signInWithGoogle } = useAuth();
   const [name, setName] = useState('');
   const [email, setEmail] = useState('');
+  const [phone, setPhone] = useState('');
   const [password, setPassword] = useState('');
-  const [token, setToken] = useState('');
+  const [coords, setCoords] = useState<{ lat: number; lng: number } | null>(null);
+  const [locLoading, setLocLoading] = useState(false);
+  const [locError, setLocError] = useState('');
   const [show, setShow] = useState(false);
   const [loading, setLoading] = useState(false);
   const [googleLoading, setGoogleLoading] = useState(false);
@@ -160,65 +162,171 @@ export function Register({ onSwitch }: { onSwitch: () => void }) {
     finally { setGoogleLoading(false); }
   };
 
-  const sendCode = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(''); setLoading(true);
-    try { await sendOtp(email); setStep(2); }
-    catch (err) { setError(err instanceof Error ? err.message : 'Failed to send code'); }
-    finally { setLoading(false); }
+  const captureLocation = () => {
+    setLocError('');
+    if (!navigator.geolocation) {
+      setLocError('Geolocation is not supported by your browser.');
+      return;
+    }
+    setLocLoading(true);
+    navigator.geolocation.getCurrentPosition(
+      (pos) => {
+        setCoords({ lat: pos.coords.latitude, lng: pos.coords.longitude });
+        setLocLoading(false);
+        setLocError('');
+      },
+      (err) => {
+        setLocLoading(false);
+        let msg = 'Failed to capture location.';
+        if (err.code === err.PERMISSION_DENIED) {
+          msg = 'Location permission was denied. Please allow location access in your browser and try again.';
+        } else if (err.code === err.POSITION_UNAVAILABLE) {
+          msg = 'Location information is unavailable. Please try again.';
+        } else if (err.code === err.TIMEOUT) {
+          msg = 'Location request timed out. Please try again.';
+        }
+        setLocError(msg);
+      },
+      { enableHighAccuracy: true, timeout: 10000, maximumAge: 0 }
+    );
   };
 
-  const verifyAndCreate = async (e: React.FormEvent) => {
-    e.preventDefault(); setError(''); setLoading(true);
-    try { await verifyOtpAndSignUp(email, token, password, name); }
-    catch (err) { setError(err instanceof Error ? err.message : 'Verification failed'); }
-    finally { setLoading(false); }
+  const handleCreateAccount = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setError('');
+
+    if (!name.trim()) {
+      setError('Full Name is required.');
+      return;
+    }
+    if (!email.trim() || !/\S+@\S+\.\S+/.test(email)) {
+      setError('A valid email address is required.');
+      return;
+    }
+    if (!phone.trim()) {
+      setError('Contact Number is required.');
+      return;
+    }
+    if (!password || password.length < 6) {
+      setError('Password must be at least 6 characters.');
+      return;
+    }
+    if (!coords) {
+      setError('Current location is required before account creation. Please click "Capture Current Location".');
+      return;
+    }
+
+    setLoading(true);
+    try {
+      await signUp(email, password, name.trim(), phone.trim(), coords.lat, coords.lng);
+    } catch (err) {
+      setError(err instanceof Error ? err.message : 'Account creation failed');
+    } finally {
+      setLoading(false);
+    }
   };
 
   return (
-    <AuthShell title={step === 1 ? 'Create account' : 'Verify your email'} subtitle={step === 1 ? 'Join RoadGuard to report road damage' : `Enter the 6-digit code sent to ${email}`}>
-      {step === 1 && (
-        <>
-          <GoogleButton onClick={handleGoogle} loading={googleLoading} label="Sign up with Google" />
-          <Divider />
-        </>
-      )}
-      {step === 1 ? (
-        <form onSubmit={sendCode} className="space-y-4">
-          {error && <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-400 rounded-xl p-3 animate-fade-in"><AlertCircle size={16} /> {error}</div>}
-          <Field icon={<User size={18} />} label="Full name">
-            <input type="text" required value={name} onChange={(e) => setName(e.target.value)} className="input pl-11" placeholder="Jane Doe" />
-          </Field>
-          <Field icon={<Mail size={18} />} label="Email">
-            <input type="email" required value={email} onChange={(e) => setEmail(e.target.value)} className="input pl-11" placeholder="you@example.com" />
-          </Field>
-          <Field icon={<Lock size={18} />} label="Password">
-            <input type={show ? 'text' : 'password'} required minLength={6} value={password} onChange={(e) => setPassword(e.target.value)} className="input pl-11 pr-11" placeholder="Min 6 characters" />
-            <button type="button" onClick={() => setShow((s) => !s)} className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[rgb(var(--text))]">
-              {show ? <EyeOff size={18} /> : <Eye size={18} />}
-            </button>
-          </Field>
-          <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-            {loading ? <span className="flex items-center justify-center gap-2"><Loader2 size={18} className="animate-spin" /> Sending code…</span> : <>Send verification code <KeyRound size={18} /></>}
-          </button>
-          <p className="text-xs text-muted text-center">A one-time code will be emailed to verify your address.</p>
-        </form>
-      ) : (
-        <form onSubmit={verifyAndCreate} className="space-y-4 animate-fade-in">
-          {error && <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-400 rounded-xl p-3"><AlertCircle size={16} /> {error}</div>}
-          <div className="flex items-center gap-2 text-sm text-emerald-600 bg-emerald-50 dark:bg-emerald-500/10 dark:text-emerald-400 rounded-xl p-3">
-            <CheckCircle2 size={16} /> Code sent to {email}
+    <AuthShell title="Create Account" subtitle="Join RoadGuard to report and monitor road conditions">
+      <GoogleButton onClick={handleGoogle} loading={googleLoading} label="Sign up with Google" />
+      <Divider />
+      <form onSubmit={handleCreateAccount} className="space-y-4">
+        {error && (
+          <div className="flex items-center gap-2 text-sm text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-400 rounded-xl p-3 animate-fade-in">
+            <AlertCircle size={16} className="shrink-0" /> {error}
           </div>
-          <Field icon={<KeyRound size={18} />} label="One-time code">
-            <input type="text" required inputMode="numeric" pattern="[0-9]{6}" maxLength={6} value={token} onChange={(e) => setToken(e.target.value)} className="input pl-11 tracking-[0.4em] font-bold text-center" placeholder="000000" />
-          </Field>
-          <button type="submit" disabled={loading} className="btn-primary w-full py-3">
-            {loading ? <span className="flex items-center justify-center gap-2"><Loader2 size={18} className="animate-spin" /> Verifying…</span> : <>Verify & create account <ArrowRight size={18} /></>}
+        )}
+        <Field icon={<User size={18} />} label="Full Name">
+          <input
+            type="text"
+            required
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            className="input pl-11"
+            placeholder="Enter your full name"
+          />
+        </Field>
+        <Field icon={<Mail size={18} />} label="Email">
+          <input
+            type="email"
+            required
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="input pl-11"
+            placeholder="Enter your email"
+          />
+        </Field>
+        <Field icon={<Phone size={18} />} label="Contact Number">
+          <input
+            type="tel"
+            required
+            value={phone}
+            onChange={(e) => setPhone(e.target.value)}
+            className="input pl-11"
+            placeholder="Enter your phone number"
+          />
+        </Field>
+        <Field icon={<Lock size={18} />} label="Password">
+          <input
+            type={show ? 'text' : 'password'}
+            required
+            minLength={6}
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="input pl-11 pr-11"
+            placeholder="Enter your password"
+          />
+          <button
+            type="button"
+            onClick={() => setShow((s) => !s)}
+            className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-[rgb(var(--text))]"
+          >
+            {show ? <EyeOff size={18} /> : <Eye size={18} />}
           </button>
-          <button type="button" onClick={() => { setStep(1); setError(''); }} className="btn-ghost w-full">
-            <span className="flex items-center justify-center gap-2"><ArrowLeft size={16} /> Back</span>
+        </Field>
+
+        <div>
+          <label className="block text-sm font-medium mb-1.5">Location</label>
+          <button
+            type="button"
+            onClick={captureLocation}
+            disabled={locLoading}
+            className="w-full py-2.5 px-4 rounded-xl border border-base surface-1 hover:surface-2 font-medium text-sm flex items-center justify-center gap-2 transition disabled:opacity-60 mb-2"
+          >
+            <MapPin size={18} className="text-primary-600" />
+            {locLoading ? (
+              <span className="flex items-center gap-2"><Loader2 size={16} className="animate-spin" /> Capturing Location…</span>
+            ) : (
+              '📍 Capture Current Location'
+            )}
           </button>
-        </form>
-      )}
+
+          {coords && (
+            <div className="surface-2 p-3 rounded-xl border border-emerald-500/30 text-sm space-y-1 animate-fade-in">
+              <div className="flex items-center gap-1.5 text-emerald-600 dark:text-emerald-400 font-semibold text-xs">
+                <CheckCircle2 size={15} /> Location captured:
+              </div>
+              <div className="text-xs text-muted font-mono">Latitude: {coords.lat.toFixed(6)}</div>
+              <div className="text-xs text-muted font-mono">Longitude: {coords.lng.toFixed(6)}</div>
+            </div>
+          )}
+
+          {locError && (
+            <div className="flex items-center gap-2 text-xs text-red-600 bg-red-50 dark:bg-red-500/10 dark:text-red-400 rounded-xl p-3 animate-fade-in">
+              <AlertCircle size={15} className="shrink-0" />
+              <span>{locError}</span>
+            </div>
+          )}
+        </div>
+
+        <button type="submit" disabled={loading} className="btn-primary w-full py-3 mt-2">
+          {loading ? (
+            <span className="flex items-center justify-center gap-2"><Loader2 size={18} className="animate-spin" /> Creating account…</span>
+          ) : (
+            <>Create Account <ArrowRight size={18} /></>
+          )}
+        </button>
+      </form>
       <p className="text-center text-sm text-muted mt-6">
         Already have an account? <button onClick={onSwitch} className="text-primary-600 font-semibold hover:underline">Sign in</button>
       </p>
