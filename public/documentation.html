@@ -1,0 +1,1816 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RoadGuard — Project Documentation</title>
+<style>
+  @page {
+    size: A4;
+    margin: 22mm 18mm 20mm 18mm;
+  }
+  @page :first {
+    margin: 0;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  :root {
+    --primary: #2563eb;
+    --primary-dark: #1e3a8a;
+    --primary-light: #dbeafe;
+    --success: #10b981;
+    --warning: #f59e0b;
+    --danger: #ef4444;
+    --accent: #8b5cf6;
+    --text: #1e293b;
+    --text-muted: #64748b;
+    --text-light: #94a3b8;
+    --bg: #ffffff;
+    --bg-alt: #f8fafc;
+    --bg-card: #f1f5f9;
+    --border: #e2e8f0;
+    --border-dark: #cbd5e1;
+    --code-bg: #1e293b;
+    --code-text: #e2e8f0;
+  }
+
+  html { font-size: 14px; scroll-behavior: smooth; }
+
+  body {
+    font-family: 'Segoe UI', 'Helvetica Neue', Arial, sans-serif;
+    color: var(--text);
+    line-height: 1.65;
+    background: var(--bg);
+    counter-reset: section;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+  }
+
+  /* ---------- COVER PAGE ---------- */
+  .cover {
+    page-break-after: always;
+    min-height: 297mm;
+    background: linear-gradient(160deg, #1e3a8a 0%, #2563eb 55%, #3b82f6 100%);
+    color: #fff;
+    display: flex;
+    flex-direction: column;
+    justify-content: space-between;
+    padding: 40mm 28mm 28mm 28mm;
+    position: relative;
+    overflow: hidden;
+  }
+  .cover::before {
+    content: '';
+    position: absolute;
+    top: -60px; right: -60px;
+    width: 320px; height: 320px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.06);
+  }
+  .cover::after {
+    content: '';
+    position: absolute;
+    bottom: -80px; left: -40px;
+    width: 260px; height: 260px;
+    border-radius: 50%;
+    background: rgba(255,255,255,0.04);
+  }
+  .cover-logo {
+    width: 72px; height: 72px;
+    border-radius: 18px;
+    background: rgba(255,255,255,0.15);
+    backdrop-filter: blur(10px);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin-bottom: 24px;
+  }
+  .cover-logo svg { width: 38px; height: 38px; }
+  .cover h1 {
+    font-size: 3.2rem;
+    font-weight: 800;
+    letter-spacing: -1px;
+    line-height: 1.1;
+    margin-bottom: 12px;
+  }
+  .cover .subtitle {
+    font-size: 1.35rem;
+    font-weight: 400;
+    opacity: 0.85;
+    margin-bottom: 8px;
+  }
+  .cover .tagline {
+    font-size: 1rem;
+    opacity: 0.65;
+    max-width: 480px;
+    line-height: 1.6;
+  }
+  .cover-meta {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+    font-size: 0.85rem;
+    opacity: 0.7;
+    z-index: 2;
+  }
+  .cover-meta strong { font-weight: 600; opacity: 0.9; }
+  .cover-badge {
+    display: inline-block;
+    padding: 6px 16px;
+    border-radius: 100px;
+    background: rgba(255,255,255,0.15);
+    font-size: 0.8rem;
+    font-weight: 600;
+    letter-spacing: 0.5px;
+    margin-top: 16px;
+    width: fit-content;
+  }
+
+  /* ---------- TYPOGRAPHY ---------- */
+  h1.doc-section {
+    font-size: 1.65rem;
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-top: 0;
+    margin-bottom: 16px;
+    padding-bottom: 10px;
+    border-bottom: 3px solid var(--primary);
+    page-break-after: avoid;
+  }
+  h2 {
+    font-size: 1.25rem;
+    font-weight: 700;
+    color: var(--text);
+    margin-top: 28px;
+    margin-bottom: 10px;
+    page-break-after: avoid;
+  }
+  h3 {
+    font-size: 1.05rem;
+    font-weight: 600;
+    color: var(--primary-dark);
+    margin-top: 20px;
+    margin-bottom: 8px;
+    page-break-after: avoid;
+  }
+  h4 {
+    font-size: 0.95rem;
+    font-weight: 600;
+    color: var(--text);
+    margin-top: 14px;
+    margin-bottom: 6px;
+  }
+  p { margin-bottom: 10px; }
+  ul, ol { margin-bottom: 12px; padding-left: 22px; }
+  li { margin-bottom: 4px; line-height: 1.6; }
+  strong { font-weight: 600; }
+  code {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.82rem;
+    background: var(--bg-card);
+    padding: 2px 6px;
+    border-radius: 4px;
+    color: var(--primary-dark);
+  }
+  pre {
+    background: var(--code-bg);
+    color: var(--code-text);
+    padding: 16px 20px;
+    border-radius: 10px;
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.78rem;
+    line-height: 1.6;
+    overflow-x: auto;
+    margin-bottom: 14px;
+    page-break-inside: avoid;
+  }
+  pre code { background: none; color: inherit; padding: 0; }
+
+  /* ---------- LAYOUT ---------- */
+  .page { page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .content { padding: 0; }
+  .section { margin-bottom: 24px; }
+
+  /* ---------- TABLE OF CONTENTS ---------- */
+  .toc {
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 24px 28px;
+    margin-bottom: 20px;
+  }
+  .toc h2 { margin-top: 0; color: var(--primary-dark); }
+  .toc ol { list-style: none; padding-left: 0; counter-reset: toc; }
+  .toc ol > li {
+    counter-increment: toc;
+    padding: 6px 0;
+    border-bottom: 1px solid var(--border);
+    font-weight: 500;
+  }
+  .toc ol > li:last-child { border-bottom: none; }
+  .toc ol > li::before {
+    content: counter(toc) ". ";
+    color: var(--primary);
+    font-weight: 700;
+    margin-right: 8px;
+  }
+  .toc .sub { padding-left: 28px; font-weight: 400; font-size: 0.88rem; color: var(--text-muted); }
+
+  /* ---------- TABLES ---------- */
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    margin-bottom: 16px;
+    font-size: 0.85rem;
+    page-break-inside: avoid;
+  }
+  th {
+    background: var(--primary-dark);
+    color: #fff;
+    text-align: left;
+    padding: 10px 14px;
+    font-weight: 600;
+    font-size: 0.82rem;
+    letter-spacing: 0.3px;
+  }
+  th:first-child { border-top-left-radius: 8px; }
+  th:last-child { border-top-right-radius: 8px; }
+  td {
+    padding: 9px 14px;
+    border-bottom: 1px solid var(--border);
+    vertical-align: top;
+  }
+  tr:nth-child(even) td { background: var(--bg-alt); }
+  tr:last-child td { border-bottom: none; }
+
+  /* ---------- CARDS / CALLOUTS ---------- */
+  .card {
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+  }
+  .card-title {
+    font-weight: 700;
+    color: var(--primary-dark);
+    margin-bottom: 8px;
+    font-size: 0.95rem;
+  }
+  .callout {
+    border-left: 4px solid var(--primary);
+    background: var(--primary-light);
+    padding: 12px 18px;
+    border-radius: 0 8px 8px 0;
+    margin-bottom: 14px;
+    font-size: 0.88rem;
+  }
+  .callout.warning { border-color: var(--warning); background: #fef3c7; }
+  .callout.success { border-color: var(--success); background: #d1fae5; }
+  .callout.danger { border-color: var(--danger); background: #fee2e2; }
+  .callout strong { display: block; margin-bottom: 4px; }
+
+  /* ---------- BADGES ---------- */
+  .badge {
+    display: inline-block;
+    padding: 3px 10px;
+    border-radius: 100px;
+    font-size: 0.75rem;
+    font-weight: 600;
+    letter-spacing: 0.3px;
+  }
+  .badge-primary { background: var(--primary-light); color: var(--primary-dark); }
+  .badge-success { background: #d1fae5; color: #065f46; }
+  .badge-warning { background: #fef3c7; color: #92400e; }
+  .badge-danger { background: #fee2e2; color: #991b1b; }
+  .badge-accent { background: #ede9fe; color: #5b21b6; }
+
+  /* ---------- FLOW DIAGRAM ---------- */
+  .flow {
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+    margin: 16px 0;
+  }
+  .flow-step {
+    display: flex;
+    align-items: flex-start;
+    gap: 14px;
+    position: relative;
+  }
+  .flow-step:not(:last-child)::after {
+    content: '';
+    position: absolute;
+    left: 17px;
+    top: 40px;
+    bottom: -8px;
+    width: 2px;
+    background: var(--border-dark);
+  }
+  .flow-num {
+    width: 36px; height: 36px;
+    border-radius: 50%;
+    background: var(--primary);
+    color: #fff;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-weight: 700;
+    font-size: 0.85rem;
+    flex-shrink: 0;
+    z-index: 1;
+  }
+  .flow-body { padding-top: 4px; padding-bottom: 16px; }
+  .flow-body strong { display: block; font-size: 0.95rem; margin-bottom: 2px; }
+  .flow-body span { font-size: 0.85rem; color: var(--text-muted); }
+
+  /* ---------- GRID ---------- */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 14px; margin-bottom: 14px; }
+  @media (max-width: 600px) {
+    .grid-2, .grid-3 { grid-template-columns: 1fr; }
+  }
+
+  /* ---------- STATUS PILLS ---------- */
+  .status-flow {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    align-items: center;
+    margin: 10px 0;
+  }
+  .status-pill {
+    padding: 5px 12px;
+    border-radius: 8px;
+    font-size: 0.78rem;
+    font-weight: 600;
+    background: var(--bg-card);
+    border: 1px solid var(--border);
+  }
+  .status-arrow { color: var(--text-light); font-size: 0.8rem; }
+
+  /* ---------- FILE TREE ---------- */
+  .file-tree {
+    font-family: 'Fira Code', 'Courier New', monospace;
+    font-size: 0.8rem;
+    line-height: 1.8;
+    background: var(--bg-alt);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 16px 20px;
+    margin-bottom: 14px;
+    white-space: pre-wrap;
+  }
+  .file-tree .dir { color: var(--primary); font-weight: 600; }
+  .file-tree .file { color: var(--text); }
+  .file-tree .comment { color: var(--text-light); font-style: italic; }
+
+  /* ---------- PRINT TWEAKS ---------- */
+  @media print {
+    .no-print { display: none !important; }
+    .page { page-break-after: always; }
+    h2, h3 { page-break-after: avoid; }
+    table, pre, .card, .callout { page-break-inside: avoid; }
+  }
+
+  .print-btn {
+    position: fixed;
+    bottom: 24px; right: 24px;
+    background: var(--primary);
+    color: #fff;
+    border: none;
+    padding: 12px 24px;
+    border-radius: 12px;
+    font-size: 0.95rem;
+    font-weight: 600;
+    cursor: pointer;
+    box-shadow: 0 4px 20px rgba(37,99,235,0.35);
+    z-index: 9999;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .print-btn:hover { transform: translateY(-2px); box-shadow: 0 6px 28px rgba(37,99,235,0.45); }
+</style>
+</head>
+<body>
+
+<!-- ===================== COVER PAGE ===================== -->
+<div class="cover">
+  <div>
+    <div class="cover-logo">
+      <svg viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+        <path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/>
+        <path d="m9 12 2 2 4-4"/>
+      </svg>
+    </div>
+    <div class="cover-badge">PROJECT DOCUMENTATION</div>
+    <h1>RoadGuard</h1>
+    <div class="subtitle">ML-Powered Road Damage Detection System</div>
+    <div class="tagline" style="margin-top:16px;">
+      A civic-tech platform that empowers citizens to report road damage through AI-powered
+      image analysis, enabling administrators to verify, triage, and escalate issues to civic
+      authorities for timely road maintenance.
+    </div>
+  </div>
+  <div class="cover-meta">
+    <div><strong>Document Type:</strong> Full Technical &amp; Functional Overview</div>
+    <div><strong>Stack:</strong> React + TypeScript + Vite + Supabase + ONNX Runtime Web</div>
+    <div><strong>Version:</strong> 1.0</div>
+    <div><strong>Date:</strong> August 2026</div>
+  </div>
+</div>
+
+<!-- ===================== TABLE OF CONTENTS ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">Table of Contents</h1>
+    <div class="toc">
+      <ol>
+        <li>Project Overview</li>
+        <li>Technology Stack</li>
+        <li>System Architecture</li>
+        <li>User Roles &amp; Access Control</li>
+        <li>User Application — Features &amp; Screens</li>
+        <li class="sub">5.1 Home Dashboard</li>
+        <li class="sub">5.2 Interactive Map</li>
+        <li class="sub">5.3 Report Creation Flow (Core Feature)</li>
+        <li class="sub">5.4 Report History</li>
+        <li class="sub">5.5 User Profile</li>
+        <li>Admin Console — Features &amp; Screens</li>
+        <li class="sub">6.1 Admin Dashboard</li>
+        <li class="sub">6.2 Report Management</li>
+        <li class="sub">6.3 Authority Complaints</li>
+        <li class="sub">6.4 User Management</li>
+        <li class="sub">6.5 Admin Map</li>
+        <li class="sub">6.6 Analytics</li>
+        <li>AI / ML Detection Pipeline</li>
+        <li class="sub">7.1 Image Preprocessing</li>
+        <li class="sub">7.2 ONNX Inference</li>
+        <li class="sub">7.3 Postprocessing (NMS)</li>
+        <li class="sub">7.4 Scoring Algorithms</li>
+        <li class="sub">7.5 Heuristic Fallback</li>
+        <li>Database Schema &amp; Data Model</li>
+        <li>Security Model &amp; RLS Policies</li>
+        <li>Authentication System</li>
+        <li>Realtime Updates</li>
+        <li>File Storage &amp; Uploads</li>
+        <li>Notifications &amp; Audit Logging</li>
+        <li>Export &amp; Reporting</li>
+        <li>Project File Structure</li>
+        <li>Environment &amp; Configuration</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 1. PROJECT OVERVIEW ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">1. Project Overview</h1>
+
+    <p>
+      <strong>RoadGuard</strong> is a civic-technology web application that bridges the gap between
+      citizens and road maintenance authorities. It allows anyone to photograph road damage
+      from their phone, automatically analyzes the image using an AI object-detection model
+      running directly in the browser, and submits a structured report to administrators for
+      verification and escalation.
+    </p>
+
+    <h2>Problem Statement</h2>
+    <p>
+      Potholes, cracks, and road surface deterioration cause vehicle damage, accidents, and
+      commuter frustration. Traditional complaint mechanisms — phone calls, physical visits to
+      municipal offices — are slow, opaque, and lack photographic evidence. RoadGuard replaces
+      this with a transparent, data-driven, mobile-first workflow.
+    </p>
+
+    <h2>Solution</h2>
+    <p>RoadGuard provides three core capabilities in one platform:</p>
+    <ul>
+      <li><strong>AI-powered damage detection</strong> — a YOLOv8 model runs in-browser via ONNX Runtime Web, identifying damage type, location, and severity from a single photo — no server round-trip required.</li>
+      <li><strong>Structured reporting workflow</strong> — each report carries GPS coordinates, a road health score, deterioration risk, maintenance priority, and a spatial severity grid, giving administrators actionable data instead of vague complaints.</li>
+      <li><strong>Admin verification &amp; authority escalation</strong> — administrators review, approve, reject, and escalate verified reports to civic authorities (BBMP) with reference numbers and tracking.</li>
+    </ul>
+
+    <h2>Key Differentiators</h2>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">On-Device Inference</div>
+        <p style="font-size:0.85rem;margin:0;">The ML model runs entirely in the user's browser using WebAssembly — no GPU server, no API costs, and images never leave the device until the user submits.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Rich Telemetry</div>
+        <p style="font-size:0.85rem;margin:0;">Every report includes confidence scores, bounding boxes, a 3&times;3 spatial severity grid, deterioration risk probability, and a computed road health score (0-100).</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Realtime Sync</div>
+        <p style="font-size:0.85rem;margin:0;">Supabase Realtime pushes database changes to all connected clients instantly — admins see new reports the moment they're submitted.</p>
+      </div>
+      <div class="card">
+        <div class="card-title">Authority Escalation</div>
+        <p style="font-size:0.85rem;margin:0;">Verified reports can be escalated to BBMP (Bruhat Bengaluru Mahanagara Palike) with auto-generated reference numbers and full status tracking.</p>
+      </div>
+    </div>
+
+    <h2>Target Users</h2>
+    <table>
+      <tr><th>Role</th><th>Who</th><th>What They Do</th></tr>
+      <tr><td><span class="badge badge-primary">User</span></td><td>Citizens, drivers, residents</td><td>Capture road damage photos, review AI analysis, submit reports, track status, escalate to authorities</td></tr>
+      <tr><td><span class="badge badge-accent">Admin</span></td><td>Municipal staff, system operators</td><td>Review &amp; verify reports, manage users, view analytics, escalate to BBMP, configure system settings</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== 2. TECHNOLOGY STACK ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">2. Technology Stack</h1>
+
+    <table>
+      <tr><th>Layer</th><th>Technology</th><th>Why</th></tr>
+      <tr>
+        <td><strong>Frontend Framework</strong></td>
+        <td>React 18 + TypeScript</td>
+        <td>Component-based UI with type safety. Hooks for state management, context for global state (auth, theme).</td>
+      </tr>
+      <tr>
+        <td><strong>Build Tool</strong></td>
+        <td>Vite 5</td>
+        <td>Fast HMR dev server, optimized production builds, ES module native support.</td>
+      </tr>
+      <tr>
+        <td><strong>Styling</strong></td>
+        <td>Tailwind CSS 3.4</td>
+        <td>Utility-first CSS for rapid, consistent design. Custom theme with 6 color ramps, dark mode support, 8px spacing system.</td>
+      </tr>
+      <tr>
+        <td><strong>Icons</strong></td>
+        <td>Lucide React</td>
+        <td>Lightweight, tree-shakeable SVG icon library. Used throughout for nav, buttons, and status indicators.</td>
+      </tr>
+      <tr>
+        <td><strong>Backend / BaaS</strong></td>
+        <td>Supabase</td>
+        <td>Postgres database, authentication, file storage, realtime subscriptions, edge functions — all in one platform.</td>
+      </tr>
+      <tr>
+        <td><strong>AI / ML</strong></td>
+        <td>ONNX Runtime Web 1.18</td>
+        <td>Runs YOLOv8 model in-browser via WebAssembly. No server inference needed. Falls back to heuristic analysis if model is absent.</td>
+      </tr>
+      <tr>
+        <td><strong>Maps</strong></td>
+        <td>Leaflet + OpenStreetMap</td>
+        <td>Free, open-source interactive maps. No API key required. Custom markers with pulsing animations for critical damage.</td>
+      </tr>
+      <tr>
+        <td><strong>Charts</strong></td>
+        <td>Custom SVG components</td>
+        <td>Hand-built line, bar, donut, and progress bar charts. No chart library dependency — full control over styling.</td>
+      </tr>
+      <tr>
+        <td><strong>Geocoding</strong></td>
+        <td>Nominatim (OpenStreetMap)</td>
+        <td>Free reverse geocoding API to convert GPS coordinates to human-readable addresses.</td>
+      </tr>
+    </table>
+
+    <h2>Package Dependencies</h2>
+    <pre><code>{
+  "dependencies": {
+    "@supabase/supabase-js": "^2.57.4",   // Supabase client SDK
+    "lucide-react": "^0.446.0",           // Icon library
+    "onnxruntime-web": "^1.18.0",          // In-browser ML inference
+    "react": "^18.3.1",                    // UI framework
+    "react-dom": "^18.3.1"                 // React DOM renderer
+  },
+  "devDependencies": {
+    "@vitejs/plugin-react": "^4.3.1",      // Vite React plugin
+    "tailwindcss": "^3.4.1",               // CSS framework
+    "typescript": "^5.5.3",                // Type checking
+    "vite": "^5.4.2"                        // Build tool
+  }
+}</code></pre>
+
+    <div class="callout">
+      <strong>Design Philosophy</strong>
+      No UI component library (Material UI, Ant Design, etc.) is used. All UI components —
+      cards, buttons, badges, modals, charts — are built from scratch with Tailwind CSS. This
+      keeps the bundle small and gives complete control over the visual design.
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 3. SYSTEM ARCHITECTURE ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">3. System Architecture</h1>
+
+    <p>
+      RoadGuard follows a <strong>client-server architecture</strong> where the browser is the
+      primary compute surface for AI inference, and Supabase serves as the managed backend for
+      data persistence, authentication, file storage, and realtime communication.
+    </p>
+
+    <h2>High-Level Data Flow</h2>
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-body">
+          <strong>User captures photo</strong>
+          <span>Browser camera API or file upload &rarr; image File object</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-body">
+          <strong>GPS capture (parallel)</strong>
+          <span>Browser Geolocation API &rarr; coordinates + reverse geocoded address via Nominatim</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-body">
+          <strong>AI inference (in-browser)</strong>
+          <span>Image &rarr; letterbox to 640&times;640 &rarr; ONNX tensor &rarr; YOLOv8 forward pass &rarr; raw detections</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-body">
+          <strong>Postprocessing &amp; scoring</strong>
+          <span>NMS &rarr; bounding boxes &rarr; severity score &rarr; grid map &rarr; deterioration risk &rarr; health score</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-body">
+          <strong>User reviews &amp; submits</strong>
+          <span>Detection canvas + metrics displayed &rarr; user confirms &rarr; image uploaded to Supabase Storage</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">6</div>
+        <div class="flow-body">
+          <strong>Report persisted &amp; admins notified</strong>
+          <span>Report row inserted &rarr; audit log written &rarr; notification rows created for all active admins</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">7</div>
+        <div class="flow-body">
+          <strong>Admin reviews &amp; acts</strong>
+          <span>Admin sees report via Realtime &rarr; verifies/rejects &rarr; status update &rarr; user notified &rarr; optionally escalates to BBMP</span>
+        </div>
+      </div>
+    </div>
+
+    <h2>Architecture Diagram (Text)</h2>
+    <pre><code>┌─────────────────────────────────────────────────────┐
+│                    USER BROWSER                       │
+│                                                       │
+│  ┌──────────┐  ┌───────────┐  ┌───────────────────┐  │
+│  │ Camera /  │  │ Geolocation│  │  ONNX Runtime Web  │  │
+│  │ Upload    │  │   API     │  │  (YOLOv8 in WASM)  │  │
+│  └────┬─────┘  └─────┬─────┘  └────────┬──────────┘  │
+│       │               │                  │             │
+│       └───────┬───────┘                  │             │
+│               ▼                          ▼             │
+│        ┌──────────────────────────────────────┐       │
+│        │       Detection Pipeline              │       │
+│        │  preprocess → infer → NMS → score    │       │
+│        └──────────────────┬───────────────────┘       │
+│                           ▼                            │
+│        ┌──────────────────────────────────────┐       │
+│        │  Review UI (canvas + metrics + GPS)  │       │
+│        └──────────────────┬───────────────────┘       │
+│                           ▼                            │
+│        ┌──────────────────────────────────────┐       │
+│        │  Supabase JS Client (auth + DB +     │       │
+│        │  storage + realtime)                 │       │
+│        └──────────────────┬───────────────────┘       │
+└───────────────────────────┼──────────────────────────┘
+                            │  HTTPS / WebSocket
+                            ▼
+┌─────────────────────────────────────────────────────┐
+│                    SUPABASE CLOUD                      │
+│                                                       │
+│  ┌─────────┐  ┌──────────┐  ┌─────────┐  ┌────────┐ │
+│  │ Postgres│  │   Auth   │  │ Storage │  │Realtime│ │
+│  │ (RLS)   │  │ (JWT)    │  │ (S3)    │  │(WS)    │ │
+│  └─────────┘  └──────────┘  └─────────┘  └────────┘ │
+│                                                       │
+│  ┌──────────────────────────────────────┐           │
+│  │  Edge Function: create-admin          │           │
+│  │  (auto-provisions default admin)       │           │
+│  └──────────────────────────────────────┘           │
+└─────────────────────────────────────────────────────┘</code></pre>
+  </div>
+</div>
+
+<!-- ===================== 4. USER ROLES ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">4. User Roles &amp; Access Control</h1>
+
+    <p>
+      RoadGuard has two user roles. The role is stored in the <code>profiles</code> table and
+      determines which application shell the user sees after login.
+    </p>
+
+    <h2>Role: User</h2>
+    <div class="card">
+      <div class="card-title">Regular Citizen / Driver</div>
+      <ul style="margin:0;">
+        <li>Can create road damage reports with AI analysis</li>
+        <li>Can view their own reports and their status</li>
+        <li>Can see their reports on an interactive map</li>
+        <li>Can edit their profile (name, phone, avatar)</li>
+        <li>Can receive notifications when admin acts on their report</li>
+        <li>Can escalate verified reports to civic authorities (BBMP)</li>
+        <li>Subject to a configurable daily report submission limit</li>
+        <li><strong>Cannot</strong> see other users' reports or the admin console</li>
+      </ul>
+    </div>
+
+    <h2>Role: Admin</h2>
+    <div class="card">
+      <div class="card-title">System Administrator / Municipal Operator</div>
+      <ul style="margin:0;">
+        <li>Can see all reports from all users</li>
+        <li>Can verify (approve) or reject reports</li>
+        <li>Can update report status through the full lifecycle</li>
+        <li>Can manage users (activate/deactivate, promote to admin, delete)</li>
+        <li>Can view system-wide analytics and dashboards</li>
+        <li>Can escalate reports to BBMP as formal complaints</li>
+        <li>Can configure the daily report limit for all users</li>
+        <li>Can export reports as CSV or PDF</li>
+        <li>Receives notifications when new reports are submitted</li>
+      </ul>
+    </div>
+
+    <h2>Routing Logic</h2>
+    <p>
+      The <code>App.tsx</code> component acts as the gate. After the splash screen, it checks
+      authentication state and the user's profile role:
+    </p>
+    <pre><code>if (state === 'loading')     → Show loading spinner
+if (state === 'unauthenticated') → Show login/register screen
+if (profile.role === 'admin')    → Render AdminApp
+else                             → Render UserApp</code></pre>
+
+    <h2>Access Enforcement</h2>
+    <div class="callout warning">
+      <strong>Defense in Depth</strong>
+      Access control is enforced at <em>two layers</em>:
+      <ol style="margin-top:6px;">
+        <li><strong>UI layer</strong> — the app only renders admin screens for admin-role users</li>
+        <li><strong>Database layer</strong> — Supabase Row Level Security (RLS) policies enforce that users can only read/write their own data, and admin-only operations use SECURITY DEFINER functions that check <code>is_admin()</code> internally</li>
+      </ol>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 5. USER APPLICATION ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">5. User Application — Features &amp; Screens</h1>
+
+    <p>
+      The user app uses a mobile-first layout with a sticky header and a bottom navigation bar
+      with 5 tabs. The header shows the RoadGuard logo, the user's role, theme toggle, notification
+      bell (with unread badge), avatar, and sign-out button.
+    </p>
+
+    <h2>5.1 Home Dashboard</h2>
+    <p>The home screen is the landing page after login. It provides a personalized overview:</p>
+    <ul>
+      <li><strong>Hero greeting card</strong> — gradient blue banner with time-based greeting ("Good morning/afternoon/evening"), user's name, simulated weather (temperature + condition), and GPS coordinates</li>
+      <li><strong>Road Health Score</strong> — computed as (approved reports / total reports) &times; 100, displayed prominently on the hero card</li>
+      <li><strong>"New Report" button</strong> — quick access to the camera/report flow</li>
+      <li><strong>4 stat cards</strong> — Total Reports, Pending, Verified, Critical — each with an icon, color-coded accent, and staggered entrance animation</li>
+      <li><strong>Severity Distribution donut chart</strong> — shows count of reports by severity (low/medium/high/critical) with color-coded segments</li>
+      <li><strong>Road Condition Summary</strong> — three progress bars: Road Health, Verified Rate, Critical Rate, each color-coded by threshold (green/amber/red)</li>
+      <li><strong>"View nearby damages on map" button</strong> — navigates to the map tab</li>
+      <li><strong>Recent Detections grid</strong> — last 6 reports shown as cards with thumbnail image, severity badge, damage type, confidence %, time-ago, and status badge. Each card has a hover zoom effect on the image.</li>
+    </ul>
+
+    <h2>5.2 Interactive Map</h2>
+    <p>
+      A full-screen Leaflet map centered on the user's GPS location (or a default fallback).
+      Features:
+    </p>
+    <ul>
+      <li>Color-coded markers for each report: <span class="badge badge-success">green</span> low, <span class="badge badge-warning">amber</span> medium, <span class="badge" style="background:#ffedd5;color:#9a3412;">orange</span> high, <span class="badge badge-danger">red</span> critical</li>
+      <li>Critical markers have a pulsing CSS animation ring for visual urgency</li>
+      <li>Clicking a marker opens a popup with: thumbnail photo, damage type, severity badge, status badge, confidence %, and date</li>
+      <li>Map tiles from OpenStreetMap (no API key needed)</li>
+      <li>Auto-zooms to fit all markers</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== 5.3 REPORT FLOW ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">5.3 Report Creation Flow (Core Feature)</h1>
+
+    <p>
+      This is the most important feature in the app. It guides the user through capturing a
+      road image, running AI analysis, reviewing results, and submitting a report. The flow has
+      5 stages:
+    </p>
+
+    <div class="flow">
+      <div class="flow-step">
+        <div class="flow-num">1</div>
+        <div class="flow-body">
+          <strong>Capture Stage</strong>
+          <span>User sees two options: "Take Photo" (opens device camera via <code>getUserMedia</code> with rear-facing camera preference) or "Upload Image" (file picker). Shows daily report limit gauge (e.g., "7 of 10 remaining"). If limit is reached, both options are disabled with an amber warning.</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">2</div>
+        <div class="flow-body">
+          <strong>Analyzing Stage</strong>
+          <span>Animated loading screen with pulsing icon and bouncing dots. In the background: GPS is captured (with 15s timeout), reverse geocoded to an address via Nominatim, and <code>analyzeImage()</code> runs the full ML pipeline. This stage typically completes in 200-800ms.</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">3</div>
+        <div class="flow-body">
+          <strong>Review Stage</strong>
+          <span>The most information-dense screen. Shows everything the AI computed (see below). User can discard or submit.</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">4</div>
+        <div class="flow-body">
+          <strong>Uploading Stage</strong>
+          <span>Image file is uploaded to Supabase Storage (<code>reports</code> bucket), then a report row is inserted into the <code>reports</code> table with all ML data. Audit log entry is written. All active admins receive a notification.</span>
+        </div>
+      </div>
+      <div class="flow-step">
+        <div class="flow-num">5</div>
+        <div class="flow-body">
+          <strong>Done Stage</strong>
+          <span>Green confirmation screen with "Report submitted!" message. User can start a new report or go to history.</span>
+        </div>
+      </div>
+    </div>
+
+    <h3>Review Screen — Data Shown to User</h3>
+    <table>
+      <tr><th>Field</th><th>Description</th><th>Example</th></tr>
+      <tr><td>Detection Canvas</td><td>Image with colored bounding boxes drawn over detected damage</td><td>Red box over a pothole</td></tr>
+      <tr><td>Damage Type</td><td>Primary damage class detected</td><td>Pothole</td></tr>
+      <tr><td>Severity</td><td>Color-coded badge (low/medium/high/critical)</td><td><span class="badge badge-danger">Critical</span></td></tr>
+      <tr><td>Confidence</td><td>Model's confidence in the detection (0-100%)</td><td>87.3%</td></tr>
+      <tr><td>Road Health Score</td><td>Computed 0-100 (higher = healthier)</td><td>42</td></tr>
+      <tr><td>Prediction Time</td><td>Milliseconds taken for inference</td><td>340 ms</td></tr>
+      <tr><td>Detections</td><td>Number of bounding boxes found</td><td>3</td></tr>
+      <tr><td>Damage Breakdown</td><td>Count of potholes, cracks, edge damage</td><td>2 potholes, 1 crack</td></tr>
+      <tr><td>Severity Score</td><td>Numeric 0-5 score</td><td>4.2 / 5</td></tr>
+      <tr><td>Maintenance Priority</td><td>low / normal / high / urgent</td><td><span class="badge badge-danger">Urgent</span></td></tr>
+      <tr><td>Deterioration Risk</td><td>0-100% probability bar (green/amber/red)</td><td>78%</td></tr>
+      <tr><td>Spatial Severity Map</td><td>3&times;3 grid with color intensity per cell</td><td>Visual grid</td></tr>
+      <tr><td>GPS Location</td><td>Coordinates + reverse-geocoded address + link to OSM</td><td>12.97189, 77.59370</td></tr>
+      <tr><td>Maintenance Recommendation</td><td>Text based on severity</td><td>"Immediate repair required"</td></tr>
+    </table>
+
+    <h3>GPS Handling</h3>
+    <p>
+      GPS capture runs in parallel with AI analysis. The app requests high-accuracy GPS with a
+      15-second timeout and an 18-second hard cutoff. GPS states shown to the user:
+    </p>
+    <ul>
+      <li><span class="badge badge-primary">Fetching</span> — "Acquiring satellite..." with spinner</li>
+      <li><span class="badge badge-success">Success</span> — green dot, coordinates + address</li>
+      <li><span class="badge badge-warning">Denied</span> — "Permission denied" with retry button</li>
+      <li><span class="badge badge-danger">Error</span> — "Unavailable" with retry button</li>
+    </ul>
+    <p>
+      If GPS fails, the user can still submit the report without location data. A "Retry GPS"
+      button is provided.
+    </p>
+  </div>
+</div>
+
+<!-- ===================== 5.4-5.5 ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">5.4 Report History &amp; 5.5 User Profile</h1>
+
+    <h2>5.4 Report History</h2>
+    <p>
+      The history tab shows all of the user's past reports in a vertical list. Each entry shows:
+    </p>
+    <ul>
+      <li>Thumbnail image of the road damage</li>
+      <li>Damage type and severity badge</li>
+      <li>Status badge (pending, approved, rejected, etc.)</li>
+      <li>Confidence percentage</li>
+      <li>Road health score</li>
+      <li>Formatted date/time</li>
+      <li>Location text (if GPS was captured)</li>
+    </ul>
+    <p>
+      Clicking a report opens the <strong>Report Detail</strong> view, which shows the full image
+      with bounding boxes, all ML metrics, the spatial grid, deterioration risk, and the complete
+      status timeline. If the report's status is "approved," the user sees an option to escalate
+      to BBMP as a formal complaint.
+    </p>
+
+    <h2>5.5 User Profile</h2>
+    <p>The profile tab lets the user manage their account:</p>
+    <ul>
+      <li><strong>Avatar</strong> — circular display of initials or uploaded photo</li>
+      <li><strong>Full Name</strong> — editable text field</li>
+      <li><strong>Phone Number</strong> — editable text field</li>
+      <li><strong>Email</strong> — display only (linked to auth, not editable here)</li>
+      <li><strong>Member since</strong> — account creation date</li>
+      <li><strong>Report statistics</strong> — total reports, verified count, pending count</li>
+      <li><strong>Dark mode toggle</strong> — switch between light and dark themes</li>
+      <li><strong>Sign out button</strong> — logs out and returns to auth screen</li>
+    </ul>
+
+    <h2>Notifications Panel</h2>
+    <p>
+      Accessible via the bell icon in the header (with unread count badge). Shows a slide-in
+      panel listing the 20 most recent notifications:
+    </p>
+    <ul>
+      <li>Notification type icon (new report, status change, etc.)</li>
+      <li>Title and body text</li>
+      <li>Time-ago label</li>
+      <li>Read/unread indicator</li>
+      <li>Clicking a notification marks it as read</li>
+      <li>"Mark all as read" button</li>
+    </ul>
+    <p>
+      Notifications update in realtime via Supabase Realtime subscriptions — the panel refreshes
+      instantly when a new notification is inserted into the database.
+    </p>
+  </div>
+</div>
+
+<!-- ===================== 6. ADMIN CONSOLE ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">6. Admin Console — Features &amp; Screens</h1>
+
+    <p>
+      The admin app uses a sidebar layout on desktop (fixed 240px sidebar) and a bottom
+      navigation bar on mobile. It has 6 sections:
+    </p>
+
+    <h2>6.1 Admin Dashboard</h2>
+    <p>The dashboard is the admin landing page with a real-time overview:</p>
+    <ul>
+      <li><strong>Live sync indicator</strong> — pulsing green dot showing realtime connection is active, with total report and user counts</li>
+      <li><strong>8 stat cards</strong> (staggered animation):
+        <ul>
+          <li>Total Users, Active Users, Today's Reports, Pending</li>
+          <li>Verified, Rejected, Critical Roads, Avg Severity (numeric 0-4)</li>
+        </ul>
+      </li>
+      <li><strong>7-day Reports Trend</strong> — line chart showing daily report counts for the past week</li>
+      <li><strong>Status Distribution donut</strong> — pending vs approved vs rejected vs other</li>
+      <li><strong>System Monitoring panel</strong> — 4 simulated metrics: ML Server (Online), API Response (124ms), Storage (42% used), Database (Healthy). Each with a progress bar.</li>
+      <li><strong>Pending Verification Queue</strong> — list of up to 5 pending reports with thumbnail, type, reporter name, time-ago, severity badge, and confidence. Clicking navigates to the reports tab.</li>
+    </ul>
+
+    <h2>6.2 Report Management</h2>
+    <p>The reports tab is where admins review and act on all submitted reports:</p>
+    <ul>
+      <li><strong>Search bar</strong> — filter by damage type or reporter name</li>
+      <li><strong>Status filter dropdown</strong> — all / submitted / pending / under_review / approved / rejected / etc.</li>
+      <li><strong>Severity filter dropdown</strong> — all / low / medium / high / critical</li>
+      <li><strong>CSV Export button</strong> — downloads filtered reports as a CSV file</li>
+      <li><strong>Daily Report Limit control</strong> — admin can change the per-user daily submission limit (1-1000). Saved via a SECURITY DEFINER RPC function.</li>
+      <li><strong>Report cards</strong> — each report shown with thumbnail, type, reporter, date, severity badge, status badge, confidence, health score, location, and review-status badges. Clicking opens the full Report Detail view.</li>
+    </ul>
+    <p>
+      In the <strong>Report Detail</strong> view, admins can:
+    </p>
+    <ul>
+      <li>View the full image with detection bounding boxes</li>
+      <li>See all ML metrics (severity, confidence, health score, grid map, deterioration risk, etc.)</li>
+      <li>Change the report status (approve, reject, assign maintenance, mark in progress, complete, close)</li>
+      <li>Add admin remarks/notes</li>
+      <li>View the reporter's name and contact info</li>
+      <li>Escalate to BBMP as a formal complaint (if approved)</li>
+      <li>Every status change writes an audit log entry and notifies the report owner</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== 6.3-6.6 ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">6.3 Authority Complaints &amp; 6.4-6.6 Other Admin Sections</h1>
+
+    <h2>6.3 Authority Complaints</h2>
+    <p>
+      This section manages formal complaints escalated to BBMP (Bruhat Bengaluru Mahanagara
+      Palike). When an admin escalates an approved report, a complaint record is created with:
+    </p>
+    <ul>
+      <li><strong>Authority details</strong> — BBMP name, email (comm@bbmp.gov.in), phone (080-22660000), helpline (1533), website, address</li>
+      <li><strong>Complaint fields</strong> — subject, message, GPS coordinates, location text</li>
+      <li><strong>Reference number</strong> — auto-generated unique tracking number</li>
+      <li><strong>Link to original report</strong> — shows the report's damage type, severity, and image</li>
+    </ul>
+    <p>Complaint status lifecycle:</p>
+    <div class="status-flow">
+      <span class="status-pill">Draft</span>
+      <span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Lodged</span>
+      <span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Acknowledged</span>
+      <span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Resolved</span>
+      <span class="status-arrow">or</span>
+      <span class="status-pill">Rejected</span>
+    </div>
+
+    <h2>6.4 User Management</h2>
+    <p>Admins can manage all user accounts:</p>
+    <ul>
+      <li><strong>Search users</strong> — by name or email</li>
+      <li><strong>User list</strong> — shows avatar, name, email, role badge, active status, join date, report count</li>
+      <li><strong>Activate/Deactivate</strong> — toggle <code>is_active</code> to enable/disable a user's access</li>
+      <li><strong>Promote to Admin</strong> — change a user's role from "user" to "admin"</li>
+      <li><strong>Delete User</strong> — permanently removes the user and all their data:
+        <ul>
+          <li>All their reports (and report images from storage)</li>
+          <li>All their notifications</li>
+          <li>All their authority complaints</li>
+          <li>All their audit log entries</li>
+          <li>Their auth account (via a SECURITY DEFINER function)</li>
+        </ul>
+      </li>
+      <li><strong>Create User</strong> — admin can create a new user account (via SECURITY DEFINER RPC)</li>
+    </ul>
+
+    <h2>6.5 Admin Map</h2>
+    <p>
+      Same interactive Leaflet map as the user version, but shows <strong>all reports across
+      all users</strong>. Same color-coded markers, popups, and critical-pulsing animations.
+    </p>
+
+    <h2>6.6 Analytics</h2>
+    <p>The analytics tab provides system-wide insights:</p>
+    <ul>
+      <li><strong>4 summary cards</strong> — Avg Confidence (%), Avg Health Score, Verification Rate (%), Total Users</li>
+      <li><strong>Monthly Reports line chart</strong> — 6-month trend of report volumes</li>
+      <li><strong>Damage Categories bar chart</strong> — count of reports per damage type (pothole, crack, surface wear, etc.)</li>
+      <li><strong>Severity Distribution donut chart</strong> — low/medium/high/critical breakdown</li>
+      <li><strong>Prediction Accuracy by Type</strong> — per-damage-type average confidence with progress bars, showing count and % for each type</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== 7. AI / ML PIPELINE ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">7. AI / ML Detection Pipeline</h1>
+
+    <p>
+      The detection pipeline is the technical heart of RoadGuard. It runs entirely in the
+      browser using ONNX Runtime Web, with a heuristic fallback when no model file is deployed.
+    </p>
+
+    <h2>7.1 Image Preprocessing</h2>
+    <p>
+      Before the image can be fed to the neural network, it must be transformed into the tensor
+      format the model expects:
+    </p>
+    <ol>
+      <li><strong>Letterbox resize</strong> — the image is scaled to fit within 640&times;640 pixels while maintaining aspect ratio. Padding (dark gray <code>#114</code>) fills the remaining space. This prevents distortion.</li>
+      <li><strong>Canvas rendering</strong> — the scaled image is drawn onto an off-screen canvas at exactly 640&times;640.</li>
+      <li><strong>Pixel extraction</strong> — <code>getImageData()</code> reads all pixels as RGBA values.</li>
+      <li><strong>Tensor conversion</strong> — pixels are rearranged into the CHW (channel-height-width) format expected by ONNX:
+        <ul>
+          <li>Channel 0 (R): all red values, normalized to [0,1] by dividing by 255</li>
+          <li>Channel 1 (G): all green values, normalized</li>
+          <li>Channel 2 (B): all blue values, normalized</li>
+        </ul>
+      </li>
+      <li><strong>Scale &amp; pad offsets</strong> — the scale factor and padding offsets are saved to map detection boxes back to original image coordinates later.</li>
+    </ol>
+    <pre><code>// Output: Float32Array of size 3 × 640 × 640 = 1,228,800 values
+// Shape: [1, 3, 640, 640]  (batch=1, channels=3, H=640, W=640)</code></pre>
+
+    <h2>7.2 ONNX Inference</h2>
+    <p>
+      The YOLOv8 model is loaded lazily from <code>/models/yolov8_pothole.onnx</code>. The app
+      first does a <code>HEAD</code> request to check if the file exists. If it does, an
+      <code>InferenceSession</code> is created with WASM execution provider and full graph
+      optimization.
+    </p>
+    <pre><code>const session = await ort.InferenceSession.create(MODEL_URL, {
+  executionProviders: ['wasm'],
+  graphOptimizationLevel: 'all',
+});
+
+const feeds = {
+  [inputName]: new ort.Tensor('float32', tensor, [1, 3, 640, 640])
+};
+
+const results = await session.run(feeds);
+// Output shape: [1, 4+num_classes, 8400] or [1, 8400, 4+num_classes]</code></pre>
+    <p>
+      The model is trained to detect 6 damage classes: <code>pothole, crack, surface_wear,
+      road_depression, broken_edge, water_damage</code>.
+    </p>
+
+    <h2>7.3 Postprocessing (Non-Maximum Suppression)</h2>
+    <p>
+      The raw model output contains 8,400 anchor predictions. Each anchor has 4 bounding box
+      coordinates (cx, cy, width, height) plus 6 class confidence scores. Postprocessing:
+    </p>
+    <ol>
+      <li><strong>Parse output</strong> — handles both transposed <code>[1, 4+NC, 8400]</code> and non-transposed <code>[1, 8400, 4+NC]</code> formats by checking if <code>numAttrs > numAnchors</code>.</li>
+      <li><strong>Best class per anchor</strong> — for each of 8,400 anchors, find the highest class score.</li>
+      <li><strong>Confidence filter</strong> — discard anchors below 0.25 (25%) confidence threshold.</li>
+      <li><strong>Coordinate mapping</strong> — convert from 640&times;640 letterboxed space back to original image space using the saved scale and pad offsets, then normalize to [0,1].</li>
+      <li><strong>Non-Maximum Suppression (NMS)</strong> — sort remaining boxes by score, greedily keep the highest, and remove overlapping boxes with IoU (Intersection-over-Union) above 0.45. This prevents duplicate detections of the same damage.</li>
+    </ol>
+    <pre><code>function nms(boxes, iouThreshold = 0.45) {
+  const sorted = [...boxes].sort((a, b) => b.score - a.score);
+  const kept = [];
+  while (sorted.length) {
+    const best = sorted.shift();
+    kept.push(best);
+    // Remove any box that overlaps too much with the kept one
+    for (let i = sorted.length - 1; i >= 0; i--) {
+      if (iou(best, sorted[i]) > iouThreshold) sorted.splice(i, 1);
+    }
+  }
+  return kept;
+}</code></pre>
+  </div>
+</div>
+
+<!-- ===================== 7.4 SCORING ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">7.4 Scoring Algorithms</h1>
+
+    <p>
+      After bounding boxes are extracted, several metrics are computed to give administrators
+      actionable intelligence beyond just "there's a pothole."
+    </p>
+
+    <h3>Damage Type Weights</h3>
+    <p>Each damage type has a severity weight used in scoring:</p>
+    <table>
+      <tr><th>Damage Type</th><th>Weight</th><th>Rationale</th></tr>
+      <tr><td>Pothole</td><td>5</td><td>Highest risk — can cause tire damage and accidents</td></tr>
+      <tr><td>Road Depression</td><td>4</td><td>Structural issue — can worsen into pothole</td></tr>
+      <tr><td>Broken Edge</td><td>4</td><td>Compromises road integrity at margins</td></tr>
+      <tr><td>Crack</td><td>3</td><td>Allows water ingress — leads to further damage</td></tr>
+      <tr><td>Water Damage</td><td>3</td><td>Indicates drainage or surface failure</td></tr>
+      <tr><td>Surface Wear</td><td>2</td><td>Lowest risk — cosmetic degradation</td></tr>
+    </table>
+
+    <h3>Severity Score (0-5)</h3>
+    <pre><code>severityScore = (Σ(weight × confidence) / numBoxes) + min(numBoxes, 5) × 0.2
+// Capped at 5.0</code></pre>
+    <p>Then mapped to a severity level:</p>
+    <table>
+      <tr><th>Score Range</th><th>Severity</th></tr>
+      <tr><td>&ge; 4.0</td><td><span class="badge badge-danger">Critical</span></td></tr>
+      <tr><td>2.8 - 3.9</td><td><span class="badge" style="background:#ffedd5;color:#9a3412;">High</span></td></tr>
+      <tr><td>1.5 - 2.7</td><td><span class="badge badge-warning">Medium</span></td></tr>
+      <tr><td>&lt; 1.5</td><td><span class="badge badge-success">Low</span></td></tr>
+    </table>
+
+    <h3>Spatial Severity Grid (3&times;3)</h3>
+    <p>
+      The image is divided into a 3&times;3 grid. Each detected bounding box is assigned to the
+      grid cell containing its center. Each cell accumulates <code>weight × confidence</code> for
+      all boxes in it, producing a spatial heat map of where damage is concentrated.
+    </p>
+
+    <h3>Deterioration Risk (0-1)</h3>
+    <pre><code>deteriorationRisk = min(1, severityScore × 0.5
+                        + min(damageCount, 8) × 0.08
+                        + maxGridSeverity × 0.05)</code></pre>
+    <p>
+      Represents the probability that the road condition will worsen if not repaired. Combines
+      overall severity, number of distinct damages, and spatial concentration.
+    </p>
+
+    <h3>Maintenance Priority</h3>
+    <pre><code>composite = severityScore × 0.6
+           + deteriorationRisk × 2
+           + min(damageCount, 5) × 0.15
+
+composite ≥ 4.5 → Urgent
+composite ≥ 3.5 → High
+composite ≥ 2.0 → Normal
+composite <  2.0 → Low</code></pre>
+
+    <h3>Road Health Score (0-100)</h3>
+    <pre><code>penalty = severityPenalty × damageCount + severityScore × 2
+healthScore = max(5, 100 - penalty)
+
+// Severity penalties:
+//   low: 8, medium: 18, high: 32, critical: 50</code></pre>
+    <p>
+      A single number representing overall road condition. 100 = pristine, 5 = severely damaged.
+      Used on dashboards and maps for quick visual assessment.
+    </p>
+
+    <h2>7.5 Heuristic Fallback</h2>
+    <p>
+      If the ONNX model file is not deployed (the <code>HEAD</code> request returns non-200 or
+      the session fails to create), the app falls back to a <strong>heuristic analyzer</strong>
+      that uses pixel-level analysis:
+    </p>
+    <ul>
+      <li><strong>Dark pixel ratio</strong> — counts pixels with luminance &lt; 80 (dark spots indicate potholes/shadows)</li>
+      <li><strong>Edge pixel ratio</strong> — counts adjacent pixels with luminance difference &gt; 45 (indicates cracks/edges)</li>
+      <li><strong>Damage type</strong> — if dark ratio &gt; 15%, classified as "pothole"; otherwise a deterministic hash-based selection from all 6 types</li>
+      <li><strong>Confidence</strong> — base 0.55 + darkRatio × 0.6 + edgeRatio × 0.4, clamped to [0.4, 0.98]</li>
+      <li><strong>Bounding boxes</strong> — 1-3 boxes generated deterministically from filename hash</li>
+      <li>All downstream scoring (severity, grid, risk, health) uses the same algorithms as the ONNX path</li>
+    </ul>
+    <div class="callout">
+      <strong>Why a fallback?</strong>
+      The heuristic ensures the app is fully functional even before the YOLOv8 model file is
+      deployed to the <code>/models/</code> directory. It produces realistic-looking results
+      using deterministic image analysis, so the entire UI and workflow can be demonstrated
+      and tested.
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 8. DATABASE SCHEMA ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">8. Database Schema &amp; Data Model</h1>
+
+    <p>
+      The database is PostgreSQL hosted on Supabase. All tables have Row Level Security (RLS)
+      enabled. The schema was created through 7 migrations.
+    </p>
+
+    <h2>Tables</h2>
+
+    <h3>profiles</h3>
+    <p>User accounts, linked 1:1 to Supabase <code>auth.users</code>.</p>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+      <tr><td>id</td><td>uuid (PK)</td><td>Matches <code>auth.users.id</code></td></tr>
+      <tr><td>email</td><td>text</td><td>User's email address</td></tr>
+      <tr><td>full_name</td><td>text</td><td>Display name</td></tr>
+      <tr><td>phone</td><td>text</td><td>Phone number</td></tr>
+      <tr><td>avatar_url</td><td>text</td><td>Profile photo URL</td></tr>
+      <tr><td>role</td><td>enum ('user','admin')</td><td>Determines app access level</td></tr>
+      <tr><td>is_active</td><td>boolean</td><td>If false, user cannot log in</td></tr>
+      <tr><td>created_at</td><td>timestamptz</td><td>Account creation time</td></tr>
+      <tr><td>updated_at</td><td>timestamptz</td><td>Last modification time</td></tr>
+    </table>
+
+    <h3>reports</h3>
+    <p>Road damage reports with all ML analysis data.</p>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+      <tr><td>id</td><td>uuid (PK)</td><td>Unique report ID</td></tr>
+      <tr><td>user_id</td><td>uuid (FK)</td><td>Reporter's profile ID</td></tr>
+      <tr><td>image_url</td><td>text</td><td>Public URL of uploaded image</td></tr>
+      <tr><td>damage_type</td><td>enum</td><td>pothole, crack, surface_wear, etc.</td></tr>
+      <tr><td>severity</td><td>enum</td><td>low, medium, high, critical</td></tr>
+      <tr><td>confidence</td><td>float</td><td>0-1 model confidence</td></tr>
+      <tr><td>road_health_score</td><td>int</td><td>0-100 computed score</td></tr>
+      <tr><td>prediction_time_ms</td><td>int</td><td>ML inference duration</td></tr>
+      <tr><td>bounding_boxes</td><td>jsonb</td><td>Array of detected boxes</td></tr>
+      <tr><td>pothole_count</td><td>int</td><td>Count of pothole detections</td></tr>
+      <tr><td>crack_count</td><td>int</td><td>Count of crack detections</td></tr>
+      <tr><td>edge_damage_count</td><td>int</td><td>Count of broken_edge detections</td></tr>
+      <tr><td>severity_score</td><td>float</td><td>0-5 numeric score</td></tr>
+      <tr><td>grid_map</td><td>jsonb</td><td>3&times;3 spatial severity grid</td></tr>
+      <tr><td>deterioration_risk</td><td>float</td><td>0-1 probability</td></tr>
+      <tr><td>maintenance_priority</td><td>enum</td><td>low, normal, high, urgent</td></tr>
+      <tr><td>latitude / longitude</td><td>float</td><td>GPS coordinates (nullable)</td></tr>
+      <tr><td>location_text</td><td>text</td><td>Reverse-geocoded address</td></tr>
+      <tr><td>status</td><td>enum</td><td>9-state lifecycle (see below)</td></tr>
+      <tr><td>admin_remarks</td><td>text</td><td>Admin notes during review</td></tr>
+      <tr><td>priority</td><td>enum</td><td>Admin-set priority</td></tr>
+      <tr><td>verified_by</td><td>uuid</td><td>Admin who verified (nullable)</td></tr>
+      <tr><td>verified_at</td><td>timestamptz</td><td>Verification timestamp</td></tr>
+      <tr><td>version</td><td>int</td><td>Optimistic concurrency version</td></tr>
+      <tr><td>created_at / updated_at</td><td>timestamptz</td><td>Timestamps</td></tr>
+    </table>
+
+    <h3>Report Status Lifecycle</h3>
+    <div class="status-flow">
+      <span class="status-pill">Submitted</span><span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Pending</span><span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Under Review</span><span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Approved</span><span class="status-arrow">or</span>
+      <span class="status-pill">Rejected</span>
+    </div>
+    <div class="status-flow" style="margin-top:4px;">
+      <span class="status-pill">Approved</span><span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Maintenance Assigned</span><span class="status-arrow">&rarr;</span>
+      <span class="status-pill">In Progress</span><span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Completed</span><span class="status-arrow">&rarr;</span>
+      <span class="status-pill">Closed</span>
+    </div>
+  </div>
+</div>
+
+<!-- ===================== 8. DATABASE (continued) ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">8. Database Schema (continued)</h1>
+
+    <h3>notifications</h3>
+    <p>In-app notifications for users.</p>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+      <tr><td>id</td><td>uuid (PK)</td><td>Unique notification ID</td></tr>
+      <tr><td>user_id</td><td>uuid (FK)</td><td>Recipient's profile ID</td></tr>
+      <tr><td>type</td><td>text</td><td>new_report, status_change, etc.</td></tr>
+      <tr><td>title</td><td>text</td><td>Short title</td></tr>
+      <tr><td>body</td><td>text</td><td>Detail text</td></tr>
+      <tr><td>report_id</td><td>uuid (FK)</td><td>Related report (nullable)</td></tr>
+      <tr><td>read</td><td>boolean</td><td>Read status (default false)</td></tr>
+      <tr><td>created_at</td><td>timestamptz</td><td>Timestamp</td></tr>
+    </table>
+
+    <h3>authority_complaints</h3>
+    <p>Formal complaints escalated to civic authorities (BBMP).</p>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+      <tr><td>id</td><td>uuid (PK)</td><td>Unique complaint ID</td></tr>
+      <tr><td>report_id</td><td>uuid (FK)</td><td>Linked report (nullable)</td></tr>
+      <tr><td>raised_by</td><td>uuid (FK)</td><td>Admin who escalated</td></tr>
+      <tr><td>authority_name</td><td>text</td><td>BBMP</td></tr>
+      <tr><td>authority_email / phone / helpline</td><td>text</td><td>Authority contact info</td></tr>
+      <tr><td>subject / message</td><td>text</td><td>Complaint content</td></tr>
+      <tr><td>latitude / longitude</td><td>float</td><td>Location (nullable)</td></tr>
+      <tr><td>location_text</td><td>text</td><td>Address</td></tr>
+      <tr><td>status</td><td>enum</td><td>draft, lodged, acknowledged, resolved, rejected</td></tr>
+      <tr><td>reference_number</td><td>text</td><td>Auto-generated tracking number</td></tr>
+      <tr><td>lodged_at</td><td>timestamptz</td><td>When complaint was lodged</td></tr>
+      <tr><td>created_at / updated_at</td><td>timestamptz</td><td>Timestamps</td></tr>
+    </table>
+
+    <h3>audit_logs</h3>
+    <p>Audit trail of all significant actions.</p>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+      <tr><td>id</td><td>uuid (PK)</td><td>Unique log ID</td></tr>
+      <tr><td>action</td><td>text</td><td>login, logout, register, report_created, status_changed, user_deleted, etc.</td></tr>
+      <tr><td>entity_type</td><td>text</td><td>reports, auth, profiles, etc.</td></tr>
+      <tr><td>entity_id</td><td>text</td><td>ID of affected entity</td></tr>
+      <tr><td>metadata</td><td>jsonb</td><td>Additional context (e.g., email, damage type)</td></tr>
+      <tr><td>device</td><td>text</td><td>User agent string (truncated)</td></tr>
+      <tr><td>created_at</td><td>timestamptz</td><td>Timestamp</td></tr>
+    </table>
+
+    <h3>app_settings</h3>
+    <p>Global application configuration.</p>
+    <table>
+      <tr><th>Column</th><th>Type</th><th>Description</th></tr>
+      <tr><td>id</td><td>int (PK)</td><td>Singleton row (id=1)</td></tr>
+      <tr><td>daily_report_limit</td><td>int</td><td>Max reports per user per day (default 10)</td></tr>
+      <tr><td>updated_at</td><td>timestamptz</td><td>Last modification</td></tr>
+    </table>
+
+    <h2>Database Migrations</h2>
+    <table>
+      <tr><th>Migration</th><th>Purpose</th></tr>
+      <tr><td>20260804042715_create_roadguard_schema</td><td>Creates profiles, reports, notifications, audit_logs tables + RLS policies</td></tr>
+      <tr><td>20260804042801_create_storage_policies</td><td>Storage bucket policies for report images</td></tr>
+      <tr><td>20260804043636_harden_functions</td><td>Security hardening for database functions</td></tr>
+      <tr><td>20260806021937_create_app_settings_and_user_management</td><td>app_settings table + admin user management functions</td></tr>
+      <tr><td>20260806025458_create_authority_complaints</td><td>authority_complaints table + RLS</td></tr>
+      <tr><td>20260806030723_add_ml_columns_to_reports</td><td>Adds ML-specific columns (bounding_boxes, grid_map, etc.) to reports</td></tr>
+      <tr><td>20260806035204_create_admin_delete_user_function</td><td>SECURITY DEFINER function for cascading user deletion</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== 9. SECURITY MODEL ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">9. Security Model &amp; RLS Policies</h1>
+
+    <p>
+      Security is enforced at the database level using PostgreSQL Row Level Security (RLS). Every
+      table has RLS enabled, meaning <strong>no data is accessible without an explicit policy</strong>.
+    </p>
+
+    <h2>RLS Policy Pattern</h2>
+    <p>Each table has 4 separate policies — one per CRUD operation (SELECT, INSERT, UPDATE, DELETE):</p>
+    <pre><code>-- Example: reports table policies for a signed-in user
+
+-- User can only SELECT their own reports
+CREATE POLICY "select_own_reports" ON reports FOR SELECT
+  TO authenticated USING (auth.uid() = user_id);
+
+-- User can only INSERT reports for themselves
+CREATE POLICY "insert_own_reports" ON reports FOR INSERT
+  TO authenticated WITH CHECK (auth.uid() = user_id);
+
+-- User can only UPDATE their own reports
+CREATE POLICY "update_own_reports" ON reports FOR UPDATE
+  TO authenticated USING (auth.uid() = user_id)
+  WITH CHECK (auth.uid() = user_id);
+
+-- User can only DELETE their own reports
+CREATE POLICY "delete_own_reports" ON reports FOR DELETE
+  TO authenticated USING (auth.uid() = user_id);</code></pre>
+
+    <div class="callout warning">
+      <strong>Key Rules</strong>
+      <ul style="margin:4px 0 0 0;">
+        <li><code>FOR ALL</code> policies are never used — always 4 separate policies per verb</li>
+        <li><code>auth.uid()</code> is used for ownership checks, never <code>current_user</code></li>
+        <li><code>USING (true)</code> is only used for intentionally public data, never as a shortcut</li>
+        <li>Admins access all data through their role, not by bypassing RLS</li>
+      </ul>
+    </div>
+
+    <h2>SECURITY DEFINER Functions</h2>
+    <p>
+      Sensitive operations that require elevated privileges use SECURITY DEFINER functions. These
+      run with the permissions of the function owner (postgres), not the caller. Each function
+      internally checks <code>is_admin()</code> before proceeding:
+    </p>
+    <table>
+      <tr><th>Function</th><th>Purpose</th><th>Who Can Call</th></tr>
+      <tr><td><code>is_admin()</code></td><td>Returns true if caller has admin role</td><td>Anyone (read-only check)</td></tr>
+      <tr><td><code>get_app_settings()</code></td><td>Returns daily report limit</td><td>Authenticated users</td></tr>
+      <tr><td><code>update_daily_report_limit()</code></td><td>Changes the daily limit</td><td>Admins only (checked internally)</td></tr>
+      <tr><td><code>admin_create_user()</code></td><td>Creates a new user account</td><td>Admins only</td></tr>
+      <tr><td><code>admin_delete_user()</code></td><td>Cascading delete of user + all data</td><td>Admins only</td></tr>
+    </table>
+
+    <h2>Storage Security</h2>
+    <p>
+      Report images are stored in a Supabase Storage bucket named <code>reports</code>. Storage
+      policies ensure:
+    </p>
+    <ul>
+      <li>Users can upload to their own folder (<code>{user_id}/...</code>)</li>
+      <li>Images are publicly readable (so they can be displayed in the app)</li>
+      <li>Users cannot delete or modify other users' images</li>
+    </ul>
+
+    <h2>Auth Security</h2>
+    <ul>
+      <li>Passwords are hashed by Supabase Auth (bcrypt)</li>
+      <li>JWT tokens are used for session management</li>
+      <li>Email confirmation is OFF (for ease of demo/testing)</li>
+      <li>OTP-based login is available as an alternative</li>
+      <li>Password reset via email is supported</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== 10. AUTHENTICATION ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">10. Authentication System</h1>
+
+    <p>
+      Authentication is handled by Supabase Auth. The <code>AuthContext</code> React context
+      provides auth state and methods to the entire app.
+    </p>
+
+    <h2>Auth State Machine</h2>
+    <pre><code>state: 'loading' → 'authenticated' | 'unauthenticated'
+
+On app load:
+  1. supabase.auth.getSession() checks for existing session
+  2. If session exists → load profile → state = 'authenticated'
+  3. If no session → state = 'unauthenticated'
+
+On auth state change (realtime):
+  SIGNED_IN  → load profile → state = 'authenticated' → log audit
+  SIGNED_OUT → clear state → state = 'unauthenticated'</code></pre>
+
+    <h2>Available Auth Methods</h2>
+    <table>
+      <tr><th>Method</th><th>Function</th><th>Description</th></tr>
+      <tr><td>Email/Password Sign Up</td><td><code>signUp(email, password, fullName)</code></td><td>Creates account with Supabase Auth. Full name stored in user_metadata.</td></tr>
+      <tr><td>Email/Password Sign In</td><td><code>signIn(email, password)</code></td><td>Standard password-based login</td></tr>
+      <tr><td>OTP Send</td><td><code>sendOtp(email)</code></td><td>Sends a 6-digit verification code to email</td></tr>
+      <tr><td>OTP Verify + Sign Up</td><td><code>verifyOtpAndSignUp(email, token, password, fullName)</code></td><td>Verifies OTP, then sets password and name</td></tr>
+      <tr><td>OTP Verify + Sign In</td><td><code>verifyOtpAndSignIn(email, token)</code></td><td>Verifies OTP for existing user</td></tr>
+      <tr><td>Password Reset</td><td><code>resetPassword(email)</code></td><td>Sends password reset email</td></tr>
+      <tr><td>Sign Out</td><td><code>signOut()</code></td><td>Clears session, logs audit entry</td></tr>
+    </table>
+
+    <h2>Profile Loading</h2>
+    <p>
+      After authentication, the app loads the user's profile from the <code>profiles</code> table
+      using <code>maybeSingle()</code> (not <code>single()</code>) to gracefully handle the case
+      where a profile row doesn't exist yet. The profile determines:
+    </p>
+    <ul>
+      <li>Which app shell to render (User vs Admin)</li>
+      <li>Whether the account is active (<code>is_active</code>)</li>
+      <li>Display name and avatar for the header</li>
+    </ul>
+
+    <h2>Default Admin Account</h2>
+    <p>
+      On first app launch, the <code>ensureAdminAccount()</code> function calls the
+      <code>create-admin</code> edge function to auto-provision a default admin:
+    </p>
+    <pre><code>Email:    admin@roadguard
+Password: admin@2026
+Name:     RoadGuard Admin
+Role:     admin</code></pre>
+    <p>
+      The edge function is idempotent — if the admin already exists, it does nothing. This
+      ensures the app is immediately usable with admin access after deployment.
+    </p>
+
+    <h2>Auth Screens</h2>
+    <ul>
+      <li><strong>Splash</strong> — animated loading screen with RoadGuard logo, shown for ~2 seconds on first load</li>
+      <li><strong>Login</strong> — email + password fields, "Forgot password?" link, "Don't have an account? Register" link</li>
+      <li><strong>Register</strong> — full name + email + password fields, "Already have an account? Login" link</li>
+      <li><strong>Forgot Password</strong> — email field, sends reset link</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== 11-14. REALTIME / STORAGE / NOTIFS / EXPORT ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">11. Realtime Updates, Storage, Notifications &amp; Export</h1>
+
+    <h2>11. Realtime Updates</h2>
+    <p>
+      Both the user and admin apps subscribe to Supabase Realtime (Postgres Changes) channels.
+      When data changes in the database, connected clients receive updates instantly without
+      polling:
+    </p>
+    <table>
+      <tr><th>Client</th><th>Channel</th><th>Events</th><th>Effect</th></tr>
+      <tr><td>User</td><td>user-reports</td><td>INSERT/UPDATE/DELETE on reports (own)</td><td>Refresh report list</td></tr>
+      <tr><td>User</td><td>user-notifs</td><td>INSERT on notifications (own)</td><td>Refresh notification list</td></tr>
+      <tr><td>Admin</td><td>admin-reports</td><td>INSERT/UPDATE/DELETE on reports (all)</td><td>Refresh report list</td></tr>
+      <tr><td>Admin</td><td>admin-users</td><td>INSERT/UPDATE/DELETE on profiles</td><td>Refresh user list</td></tr>
+      <tr><td>Admin</td><td>admin-notifs</td><td>INSERT on notifications (own)</td><td>Refresh notification list</td></tr>
+    </table>
+    <p>
+      The admin dashboard displays a "Live sync active" indicator with a pulsing green dot to
+      show the realtime connection is working.
+    </p>
+
+    <h2>12. File Storage &amp; Uploads</h2>
+    <p>
+      Report images are uploaded to the Supabase Storage bucket <code>reports</code>. The upload
+      path is structured as <code>{user_id}/{timestamp}-{random}.{ext}</code> to ensure:
+    </p>
+    <ul>
+      <li>Files are organized by user</li>
+      <li>No filename collisions (timestamp + random suffix)</li>
+      <li>Original file extension is preserved</li>
+    </ul>
+    <p>
+      After upload, a public URL is generated and stored in the <code>image_url</code> column of
+      the report. This URL is used to display the image in all views.
+    </p>
+
+    <h2>13. Notifications &amp; Audit Logging</h2>
+    <h3>Notifications</h3>
+    <p>
+      Notifications are created by the app at key moments:
+    </p>
+    <ul>
+      <li><strong>New report submitted</strong> → all active admins notified</li>
+      <li><strong>Report status changed</strong> → report owner notified</li>
+      <li><strong>Report verified/rejected</strong> → report owner notified</li>
+    </ul>
+    <p>
+      The notification panel shows the 20 most recent, with unread count badge in the header.
+      Clicking a notification marks it as read.
+    </p>
+
+    <h3>Audit Logging</h3>
+    <p>
+      Every significant action is logged to the <code>audit_logs</code> table:
+    </p>
+    <ul>
+      <li><code>login</code> / <code>logout</code> / <code>register</code></li>
+      <li><code>report_created</code></li>
+      <li><code>status_changed</code> (with old/new status in metadata)</li>
+      <li><code>user_deleted</code> / <code>user_activated</code> / <code>user_deactivated</code></li>
+      <li><code>complaint_lodged</code> / <code>complaint_updated</code></li>
+    </ul>
+    <p>
+      Each log entry includes the action, entity type, entity ID, metadata (JSON), and the user's
+      device/user-agent string (truncated to 120 chars).
+    </p>
+
+    <h2>14. Export &amp; Reporting</h2>
+    <p>
+      Admins can export reports in two formats:
+    </p>
+    <ul>
+      <li><strong>CSV Export</strong> — downloads a CSV file with columns: ID, Damage Type, Severity, Confidence, Road Health, Status, Latitude, Longitude, Location, Created, Priority. Properly escapes quotes and commas.</li>
+      <li><strong>PDF Export</strong> — opens a new window with a styled HTML table and triggers the browser's print dialog (which can save as PDF). Includes RoadGuard branding, generation timestamp, and reporter name.</li>
+    </ul>
+  </div>
+</div>
+
+<!-- ===================== 15. FILE STRUCTURE ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">15. Project File Structure</h1>
+
+    <div class="file-tree"><span class="dir">project/</span>
+├── <span class="file">index.html</span>                          <span class="comment"># Vite HTML entry point</span>
+├── <span class="file">package.json</span>                        <span class="comment"># Dependencies and scripts</span>
+├── <span class="file">vite.config.ts</span>                     <span class="comment"># Vite build config</span>
+├── <span class="file">tailwind.config.js</span>                 <span class="comment"># Tailwind theme (colors, fonts, dark mode)</span>
+├── <span class="file">tsconfig.json</span>                      <span class="comment"># TypeScript config</span>
+├── <span class="file">postcss.config.js</span>                  <span class="comment"># PostCSS for Tailwind</span>
+├── <span class="file">eslint.config.js</span>                   <span class="comment"># ESLint rules</span>
+├── <span class="file">.env</span>                               <span class="comment"># Supabase environment variables</span>
+│
+├── <span class="dir">public/</span>
+│   ├── <span class="file">roadguard.svg</span>                   <span class="comment"># Logo SVG</span>
+│   ├── <span class="file">image.png</span>                        <span class="comment"># Favicon / placeholder</span>
+│   ├── <span class="file">documentation.html</span>              <span class="comment"># This document</span>
+│   └── <span class="dir">ort/</span>                            <span class="comment"># ONNX Runtime WASM files</span>
+│       ├── ort-wasm-simd-threaded.jsep.wasm
+│       ├── ort-wasm-simd-threaded.wasm
+│       └── ort-wasm.wasm
+│
+├── <span class="dir">src/</span>
+│   ├── <span class="file">main.tsx</span>                         <span class="comment"># React DOM render entry</span>
+│   ├── <span class="file">App.tsx</span>                          <span class="comment"># Root component (splash → auth gate → app shell)</span>
+│   ├── <span class="file">index.css</span>                        <span class="comment"># Global styles + Tailwind directives</span>
+│   ├── <span class="file">vite-env.d.ts</span>                     <span class="comment"># Vite type declarations</span>
+│   │
+│   ├── <span class="dir">context/</span>
+│   │   ├── <span class="file">AuthContext.tsx</span>              <span class="comment"># Auth state, sign in/up/out, profile loading</span>
+│   │   └── <span class="file">ThemeContext.tsx</span>              <span class="comment"># Dark/light theme toggle</span>
+│   │
+│   ├── <span class="dir">lib/</span>
+│   │   ├── <span class="file">supabase.ts</span>                   <span class="comment"># Supabase client singleton</span>
+│   │   ├── <span class="file">types.ts</span>                      <span class="comment"># All TypeScript types + label maps</span>
+│   │   ├── <span class="file">detection.ts</span>                  <span class="comment"># ONNX inference + heuristic fallback</span>
+│   │   ├── <span class="file">predictor.ts</span>                  <span class="comment"># Severity, risk, priority, health scoring</span>
+│   │   ├── <span class="file">grid-scorer.ts</span>                 <span class="comment"># 3×3 grid computation + damage weights</span>
+│   │   ├── <span class="file">services.ts</span>                    <span class="comment"># DB service layer (fetch, notify, audit, settings)</span>
+│   │   ├── <span class="file">storage.ts</span>                    <span class="comment"># Image upload to Supabase Storage</span>
+│   │   ├── <span class="file">export.ts</span>                     <span class="comment"># CSV and PDF export functions</span>
+│   │   ├── <span class="file">format.ts</span>                     <span class="comment"># Date formatting, severity/status CSS classes</span>
+│   │   └── <span class="file">setup.ts</span>                       <span class="comment"># Auto-provision default admin account</span>
+│   │
+│   ├── <span class="dir">components/</span>
+│   │   ├── <span class="file">ui/index.tsx</span>                  <span class="comment"># Reusable UI: Card, StatCard, Badge, Button, Spinner, etc.</span>
+│   │   ├── <span class="file">Charts.tsx</span>                     <span class="comment"># SVG charts: LineChart, BarChart, DonutChart, ProgressBar</span>
+│   │   ├── <span class="file">CameraCapture.tsx</span>             <span class="comment"># Camera modal with getUserMedia</span>
+│   │   ├── <span class="file">DetectionCanvas.tsx</span>            <span class="comment"># Draws bounding boxes over image</span>
+│   │   ├── <span class="file">MapView.tsx</span>                    <span class="comment"># Leaflet map wrapper with custom markers</span>
+│   │   ├── <span class="file">NotificationsPanel.tsx</span>         <span class="comment"># Slide-in notification panel</span>
+│   │   └── <span class="file">ReportDetail.tsx</span>               <span class="comment"># Full report detail view (shared user + admin)</span>
+│   │
+│   └── <span class="dir">pages/</span>
+│       ├── <span class="dir">auth/</span>
+│       │   ├── <span class="file">Splash.tsx</span>                 <span class="comment"># Animated splash screen</span>
+│       │   └── <span class="file">AuthPages.tsx</span>              <span class="comment"># Login, Register, ForgotPassword screens</span>
+│       │
+│       ├── <span class="dir">user/</span>
+│       │   ├── <span class="file">UserApp.tsx</span>                <span class="comment"># User shell: header + bottom nav + tab routing</span>
+│       │   ├── <span class="file">UserHome.tsx</span>                <span class="comment"># Home dashboard with stats + charts</span>
+│       │   ├── <span class="file">UserMap.tsx</span>                 <span class="comment"># User's reports on Leaflet map</span>
+│       │   ├── <span class="file">ReportFlow.tsx</span>              <span class="comment"># Multi-stage report creation flow</span>
+│       │   ├── <span class="file">UserHistory.tsx</span>             <span class="comment"># Report history list</span>
+│       │   └── <span class="file">UserProfile.tsx</span>             <span class="comment"># Profile editing + settings</span>
+│       │
+│       └── <span class="dir">admin/</span>
+│           ├── <span class="file">AdminApp.tsx</span>               <span class="comment"># Admin shell: sidebar + content routing</span>
+│           ├── <span class="file">AdminDashboard.tsx</span>          <span class="comment"># Overview dashboard with live stats</span>
+│           ├── <span class="file">AdminReports.tsx</span>           <span class="comment"># Report management + filters + daily limit</span>
+│           ├── <span class="file">AdminComplaints.tsx</span>        <span class="comment"># BBMP complaint management</span>
+│           ├── <span class="file">AdminUsers.tsx</span>             <span class="comment"># User management (activate, promote, delete)</span>
+│           ├── <span class="file">AdminMap.tsx</span>                <span class="comment"># All reports on map</span>
+│           └── <span class="file">AdminAnalytics.tsx</span>         <span class="comment"># System-wide analytics + charts</span>
+│
+└── <span class="dir">supabase/</span>
+    ├── <span class="dir">migrations/</span>                       <span class="comment"># 7 SQL migration files</span>
+    │   ├── 20260804042715_create_roadguard_schema.sql
+    │   ├── 20260804042801_create_storage_policies.sql
+    │   ├── 20260804043636_harden_functions.sql
+    │   ├── 20260806021937_create_app_settings_and_user_management.sql
+    │   ├── 20260806025458_create_authority_complaints.sql
+    │   ├── 20260806030723_add_ml_columns_to_reports.sql
+    │   └── 20260806035204_create_admin_delete_user_function.sql
+    │
+    └── <span class="dir">functions/</span>
+        └── <span class="dir">create-admin/</span>
+            └── <span class="file">index.ts</span>                  <span class="comment"># Edge function: auto-provision admin</span></div>
+
+    <h2>Key File Responsibilities</h2>
+    <table>
+      <tr><th>File</th><th>Responsibility</th></tr>
+      <tr><td><code>src/App.tsx</code></td><td>Root: splash → auth gate → routes to UserApp or AdminApp based on role</td></tr>
+      <tr><td><code>src/context/AuthContext.tsx</code></td><td>Manages auth session, profile loading, all auth methods</td></tr>
+      <tr><td><code>src/lib/detection.ts</code></td><td>ONNX model loading, image preprocessing, inference, NMS, heuristic fallback</td></tr>
+      <tr><td><code>src/lib/predictor.ts</code></td><td>Computes severity score, deterioration risk, maintenance priority, health score</td></tr>
+      <tr><td><code>src/lib/grid-scorer.ts</code></td><td>3&times;3 spatial grid computation, damage type weights</td></tr>
+      <tr><td><code>src/lib/services.ts</code></td><td>All database operations: fetch reports, notifications, audit, settings, user management</td></tr>
+      <tr><td><code>src/lib/types.ts</code></td><td>All TypeScript interfaces and enum/label maps</td></tr>
+      <tr><td><code>src/pages/user/ReportFlow.tsx</code></td><td>The 5-stage report creation flow (core feature)</td></tr>
+    </table>
+  </div>
+</div>
+
+<!-- ===================== 16. ENVIRONMENT ===================== -->
+<div class="page">
+  <div class="content">
+    <h1 class="doc-section">16. Environment &amp; Configuration</h1>
+
+    <h2>Environment Variables</h2>
+    <p>
+      The app connects to Supabase using credentials stored in the <code>.env</code> file. These
+      are pre-provisioned and do not need manual configuration:
+    </p>
+    <pre><code># Supabase Configuration (pre-populated)
+VITE_SUPABASE_URL=https://&lt;project-id&gt;.supabase.co
+VITE_SUPABASE_ANON_KEY=&lt;anon-key&gt;
+
+# Server-side (used by edge functions)
+SUPABASE_URL=https://&lt;project-id&gt;.supabase.co
+SUPABASE_ANON_KEY=&lt;anon-key&gt;
+SUPABASE_SERVICE_ROLE_KEY=&lt;service-role-key&gt;
+SUPABASE_DB_URL=postgresql://...</code></pre>
+
+    <h2>Build Scripts</h2>
+    <table>
+      <tr><th>Command</th><th>Purpose</th></tr>
+      <tr><td><code>npm run dev</code></td><td>Start Vite dev server with HMR (auto-started in this environment)</td></tr>
+      <tr><td><code>npm run build</code></td><td>Production build to <code>dist/</code></td></tr>
+      <tr><td><code>npm run typecheck</code></td><td>TypeScript type checking without emitting files</td></tr>
+      <tr><td><code>npm run lint</code></td><td>Run ESLint</td></tr>
+      <tr><td><code>npm run preview</code></td><td>Preview the production build locally</td></tr>
+    </table>
+
+    <h2>Theme System</h2>
+    <p>
+      The app supports light and dark modes via the <code>ThemeContext</code>. Tailwind's
+      <code>dark:</code> variant is used throughout. The theme toggle is available in the header
+      for both user and admin apps. The theme persists across sessions via localStorage.
+    </p>
+    <p>Custom CSS utility classes used throughout:</p>
+    <ul>
+      <li><code>surface</code> / <code>surface-2</code> — background colors that adapt to theme</li>
+      <li><code>glass</code> — frosted glass effect (backdrop-blur) for headers</li>
+      <li><code>card</code> — card container with border, radius, and shadow</li>
+      <li><code>btn-primary</code> / <code>btn-ghost</code> — button styles</li>
+      <li><code>badge</code> — small pill-shaped label</li>
+      <li><code>input</code> — form input styling</li>
+      <li><code>border-base</code> — theme-adaptive border color</li>
+      <li><code>text-muted</code> — theme-adaptive muted text</li>
+    </ul>
+
+    <h2>Path Alias</h2>
+    <p>
+      The <code>@/</code> alias maps to <code>src/</code>, so imports like
+      <code>@/components/Charts</code> resolve to <code>src/components/Charts</code>. This is
+      configured in <code>tsconfig.json</code> and <code>vite.config.ts</code>.
+    </p>
+
+    <h2>ONNX Runtime Web Configuration</h2>
+    <p>
+      The ONNX Runtime WASM files are served from <code>/public/ort/</code>. The path is set
+      in <code>detection.ts</code>:
+    </p>
+    <pre><code>ort.env.wasm.wasmPaths = '/ort/';</code></pre>
+    <p>
+      The model file is expected at <code>/public/models/yolov8_pothole.onnx</code>. If this
+      file is not present, the app uses the heuristic fallback analyzer.
+    </p>
+
+    <div class="callout success" style="margin-top:20px;">
+      <strong>End of Documentation</strong>
+      This document covers the complete architecture, features, AI pipeline, database schema,
+      security model, and file structure of the RoadGuard application. For any code-level
+      questions, refer to the specific files listed in Section 15.
+    </div>
+  </div>
+</div>
+
+<button class="print-btn no-print" onclick="window.print()">
+  Print / Save as PDF
+</button>
+
+</body>
+</html>
