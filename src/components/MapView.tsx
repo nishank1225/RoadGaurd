@@ -84,27 +84,41 @@ export function MapView({ reports, center, onSelect, height = '100%', zoom }: {
     // Remove old heat layer
     if (heatRef.current) { heatRef.current.remove(); heatRef.current = null; }
 
-    const geoReports = reports.filter((r) => r.latitude != null && r.longitude != null);
+    const geoReports = reports.filter(
+      (r) => r.latitude != null && r.longitude != null && !isNaN(r.latitude) && !isNaN(r.longitude)
+    );
 
     // Add markers (always present, but hidden when heatmap is on)
     geoReports.forEach((r) => {
       const color = severityColor(r.severity);
       const pulse = r.severity === 'critical';
       const marker = L.marker([r.latitude, r.longitude], { icon: markerIcon(color, pulse) });
+      const locStr = r.location_text || `${r.latitude?.toFixed(4)}, ${r.longitude?.toFixed(4)}`;
       const html = `<div style="min-width:200px;font-family:Inter,sans-serif">
         <img src="${r.image_url}" style="width:100%;height:90px;object-fit:cover;border-radius:8px;margin-bottom:8px" />
         <div style="font-weight:700;font-size:13px;margin-bottom:2px">${DAMAGE_TYPE_LABEL[r.damage_type]}</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:2px">ID: ${r.id.slice(0, 8)}...</div>
+        <div style="font-size:11px;color:#64748b;margin-bottom:2px">Location: ${locStr}</div>
         <div style="font-size:11px;color:#64748b;margin-bottom:6px">
-          ${SEVERITY_LABEL[r.severity]} • ${STATUS_LABEL[r.status]}
+          Severity: ${SEVERITY_LABEL[r.severity]} • Status: ${STATUS_LABEL[r.status]}
         </div>
         <div style="font-size:11px;color:#64748b">${formatDateTime(r.created_at)}</div>
-        <div style="font-size:11px;color:#64748b">Confidence ${(r.confidence * 100).toFixed(0)}%</div>
       </div>`;
       marker.bindPopup(html);
       marker.on('click', () => { if (onSelect) onSelect(r); });
       marker.addTo(mapRef.current);
       markersRef.current.push(marker);
     });
+
+    // Auto fit bounds / center map based on live reports
+    if (geoReports.length === 1) {
+      mapRef.current.setView([geoReports[0].latitude, geoReports[0].longitude], 12);
+    } else if (geoReports.length > 1) {
+      const bounds = L.latLngBounds(geoReports.map((r) => [r.latitude, r.longitude]));
+      mapRef.current.fitBounds(bounds, { padding: [50, 50] });
+    } else if (center) {
+      mapRef.current.setView(center, zoom ?? INDIA_ZOOM);
+    }
 
     // Add heat layer
     if (L.heatLayer && geoReports.length > 0) {
@@ -145,8 +159,8 @@ export function MapView({ reports, center, onSelect, height = '100%', zoom }: {
   }, [showHeat, ready]);
 
   useEffect(() => {
-    if (center && mapRef.current) mapRef.current.setView([center[0], center[1]], zoom ?? mapRef.current.getZoom());
-  }, [center, zoom]);
+    if (center && mapRef.current && reports.length === 0) mapRef.current.setView([center[0], center[1]], zoom ?? mapRef.current.getZoom());
+  }, [center, zoom, reports.length]);
 
   return (
     <div className="rg-map-container relative" style={{ height, width: '100%' }}>
@@ -162,17 +176,20 @@ export function MapView({ reports, center, onSelect, height = '100%', zoom }: {
   );
 }
 
-export function SeverityLegend() {
+export function SeverityLegend({ counts }: { counts?: Record<string, number> }) {
   const items = [
-    { c: '#10b981', l: 'Low' }, { c: '#f59e0b', l: 'Medium' },
-    { c: '#f97316', l: 'High' }, { c: '#ef4444', l: 'Critical' },
+    { c: '#10b981', l: 'Low', key: 'low' },
+    { c: '#f59e0b', l: 'Medium', key: 'medium' },
+    { c: '#f97316', l: 'High', key: 'high' },
+    { c: '#ef4444', l: 'Critical', key: 'critical' },
   ];
   return (
-    <div className="flex gap-3 flex-wrap">
+    <div className="flex gap-3 flex-wrap items-center">
       {items.map((i) => (
         <div key={i.l} className="flex items-center gap-1.5 text-xs">
-          <span className="w-3 h-3 rounded-full" style={{ background: i.c }} />
+          <span className="w-3 h-3 rounded-full shrink-0" style={{ background: i.c }} />
           <span className="text-muted">{i.l}</span>
+          {counts && <span className="font-semibold text-foreground">{counts[i.key] ?? 0}</span>}
         </div>
       ))}
     </div>
